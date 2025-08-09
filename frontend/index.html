@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EventSphere - Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="navbar-container"></header>
+
+  <header class="bg-primary text-white text-center py-5">
+    <h1>Welcome to EventSphere</h1>
+    <p class="lead">Your university's central hub for all events.</p>
+  </header>
+
+  <section class="container my-5">
+    <h2 class="text-center mb-4">Upcoming Approved Events</h2>
+    <div class="row" id="events-container">
+        <p class="text-center text-muted">Loading events...</p>
+    </div>
+  </section>
+
+  <footer class="bg-dark text-white text-center p-3 mt-5">
+    © 2025 EventSphere
+  </footer>
+
+<script src="config.js"></script>
+<script>
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('role');
+        const navLinks = document.getElementById('nav-links');
+
+        if (token) {
+            let dashboardUrl = "student-dashboard.html";
+            if (userRole === 'club') dashboardUrl = "club-dashborad.html";
+            if (userRole === 'admin') dashboardUrl = "admin-dashborad.html";
+            navLinks.innerHTML = `
+                <a class="btn btn-light" href="${dashboardUrl}">Go to Dashboard</a>
+                <button class="btn btn-outline-light ms-2" onclick="logout()">Logout</button>
+            `;
+        } else {
+            navLinks.innerHTML = `
+                <a class="btn btn-outline-light me-2" href="login.html">Login</a>
+                <a class="btn btn-light" href="signup.html">Sign Up</a>
+            `;
+        }
+        
+        loadUpcomingEvents();
+    });
+
+    async function loadUpcomingEvents() {
+        const eventsContainer = document.getElementById('events-container');
+        try {
+            const res = await fetch(`${BASE_URL}/api/events`);
+            if (!res.ok) throw new Error('Failed to fetch events');
+            const allEvents = await res.json();
+            
+            // --- START OF PERMANENT FIX ---
+            // Create a date object for the beginning of today (midnight)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let eventsHtml = '';
+            // Filter for approved events that are on or after the beginning of today
+            allEvents.filter(e => e.status === 'approved' && new Date(e.date) >= today).forEach(event => {
+            // --- END OF PERMANENT FIX ---
+                eventsHtml += `
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="${BASE_URL}${event.posterUrl}" class="card-img-top" style="height: 200px; object-fit: cover;" onerror="this.onerror=null;this.src='https://via.placeholder.com/400x200.png?text=EventSphere';">
+                            <div class="card-body">
+                                <h5 class="card-title">${event.title}</h5>
+                                <p class="card-text">${new Date(event.date).toLocaleDateString()}</p>
+                                <a href="event.html?id=${event._id}" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            eventsContainer.innerHTML = eventsHtml || '<p class="text-center text-muted">No upcoming events at this time.</p>';
+        } catch (error) {
+            eventsContainer.innerHTML = `<p class="text-center text-danger">${error.message}</p>`;
+        }
+    }
+</script>
+<script src="navbar.js"></script>
+</body>
+</html>
