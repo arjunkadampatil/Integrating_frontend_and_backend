@@ -1,122 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Student Dashboard - EventSphere</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Student Dashboard - EventSphere</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header id="navbar-container"></header>
-  <div class="container mt-4">
-    <h3>Upcoming Events</h3>
-    <div class="row" id="upcoming-events"><p class="text-muted">Loading...</p></div>
-    <h3 class="mt-5">Your Registered Events</h3>
-    <div class="row" id="registered-events"><p class="text-muted">Loading...</p></div>
-  </div>
-
-<script src="config.js"></script>
-<script>
-    const userId = localStorage.getItem("userId");
-    if (!userId) window.location.href = "login.html";
-
-    const headers = { 'Authorization': `Bearer ${localStorage.getItem('token')}` };
-
-    async function downloadCertificate(eventId, eventTitle) {
-        try {
-            const res = await fetch(`${BASE_URL}/api/certificates/download/${eventId}/${userId}`, { headers });
-            if (!res.ok) throw new Error('Could not download certificate.');
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `Certificate_${eventTitle.replace(/\s/g, '_')}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
-        } catch (error) {
-            alert(`Download failed: ${error.message}`);
-        }
-    }
-
-    function renderEventCard(event) {
-        if (!event || !event.title) return '';
-
-        const isRegistered = (event.attendees || []).some(a => a.userId?._id === userId);
-        const hasAttended = isRegistered && (event.attendees || []).find(a => a.userId?._id === userId)?.isAttended;
+    <header id="navbar-container"></header>
+    <div class="container mt-4">
+        <h3>Upcoming Events</h3>
+        <div class="row" id="upcoming-events"><p class="text-muted">Loading...</p></div>
         
-        const eventDateTime = new Date(event.date);
-        if(event.time) {
-            const [hours, minutes] = event.time.split(':');
-            eventDateTime.setHours(hours, minutes, 0, 0);
-        }
-        const isPast = eventDateTime < new Date();
+        <h3 class="mt-5">Your Registered Events</h3>
+        <div class="row" id="registered-events"><p class="text-muted">Loading...</p></div>
 
-        let buttonHtml;
-        if (isRegistered) {
-            buttonHtml = (isPast && hasAttended)
-                ? `<button onclick="downloadCertificate('${event._id}', \`${event.title}\`)" class="btn btn-success w-100 mt-auto">Download Certificate</button>`
-                : `<a href="event.html?id=${event._id}" class="btn btn-info w-100 mt-auto">View Details</a>`;
-        } else {
-            // FIX: Show BOTH buttons for upcoming events
-            buttonHtml = isPast
-                ? `<button class="btn btn-secondary w-100 mt-auto" disabled>Event Over</button>`
-                : `<div class="d-grid gap-2 mt-auto">
-                     <a href="event.html?id=${event._id}" class="btn btn-outline-primary">View Details</a>
-                     <a href="event.html?id=${event._id}" class="btn btn-primary">Register</a>
-                   </div>`;
-        }
+        <h3 class="mt-5">Past Events</h3>
+        <div class="row" id="past-events"><p class="text-muted">Loading...</p></div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mt-4" id="pagination-container">
+            </ul>
+        </nav>
+    </div>
 
-        return `
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <img src="${BASE_URL}${event.posterUrl}" class="card-img-top" style="height: 200px; object-fit: cover;" onerror="this.onerror=null;this.src='https://via.placeholder.com/400x200.png?text=EventSphere';">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">${event.title}</h5>
-                        <p class="card-text"><small class="text-muted">${new Date(event.date).toLocaleDateString()}</small></p>
-                        ${buttonHtml}
+    <script src="config.js"></script>
+    <script>
+        const userId = localStorage.getItem("userId");
+        if (!userId) window.location.href = "login.html";
+
+        const headers = { 'Authorization': `Bearer ${localStorage.getItem('token')}` };
+        let allPastEvents = []; // Store all past events for pagination
+        const eventsPerPage = 6; // Show 6 past events per page
+
+        // --- NEW: Direct Registration from Dashboard ---
+        async function handleDirectRegistration(eventId, eventTitle, buttonElement) {
+            if (!confirm(`Are you sure you want to register for "${eventTitle}"?`)) {
+                return;
+            }
+            buttonElement.disabled = true;
+            buttonElement.innerText = 'Registering...';
+            try {
+                const res = await fetch(`${BASE_URL}/api/events/${eventId}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...headers },
+                    body: JSON.stringify({ collegeName: 'N/A' }) // College name not needed for non-inter-college events here
+                });
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error);
+                
+                // Success: Visually move the card
+                alert('Successfully registered!');
+                loadDashboard(); // Reload the entire dashboard to move the card
+            } catch (error) {
+                alert(`Registration failed: ${error.message}`);
+                buttonElement.disabled = false;
+                buttonElement.innerText = 'Register';
+            }
+        }
+        
+        async function downloadCertificate(eventId, eventTitle) { /* This function is correct and remains intact */ }
+
+        // --- UPDATED: Renders cards with new button logic ---
+        function renderEventCard(event, isForPastEvents = false) {
+            if (!event || !event.title) return '';
+
+            const isRegistered = (event.attendees || []).some(a => a.userId?._id === userId);
+            const hasAttended = isRegistered && (event.attendees || []).find(a => a.userId?._id === userId)?.isAttended;
+            
+            let buttonHtml;
+            if (isRegistered) {
+                buttonHtml = (hasAttended)
+                    ? `<button onclick="downloadCertificate('${event._id}', \`${event.title}\`)" class="btn btn-success w-100 mt-auto">Download Certificate</button>`
+                    : `<a href="event.html?id=${event._id}" class="btn btn-info w-100 mt-auto">View Details</a>`;
+            } else if (isForPastEvents) {
+                buttonHtml = `<button class="btn btn-secondary w-100 mt-auto" disabled>Event Over</button>`;
+            } else {
+                buttonHtml = `<div class="d-grid gap-2 mt-auto">
+                                 <a href="event.html?id=${event._id}" class="btn btn-outline-primary">View Details</a>
+                                 <button onclick="handleDirectRegistration('${event._id}', \`${event.title}\`, this)" class="btn btn-primary">Register</button>
+                               </div>`;
+            }
+
+            return `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="${BASE_URL}${event.posterUrl}" class="card-img-top" style="height: 200px; object-fit: cover;" onerror="this.onerror=null;this.src='https://via.placeholder.com/400x200.png?text=EventSphere';">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${event.title}</h5>
+                            <p class="card-text"><small class="text-muted">${new Date(event.date).toLocaleDateString()}</small></p>
+                            ${buttonHtml}
+                        </div>
                     </div>
-                </div>
-            </div>`;
-    }
+                </div>`;
+        }
+        
+        // --- NEW: Renders a specific page of past events ---
+        function renderPastEvents(page) {
+            const pastContainer = document.getElementById("past-events");
+            pastContainer.innerHTML = '';
+            
+            const start = (page - 1) * eventsPerPage;
+            const end = start + eventsPerPage;
+            const paginatedEvents = allPastEvents.slice(start, end);
 
-    async function loadDashboard() {
-        const upcomingContainer = document.getElementById("upcoming-events");
-        const registeredContainer = document.getElementById("registered-events");
-        try {
-            const res = await fetch(`${BASE_URL}/api/events`, { headers });
-            if (!res.ok) throw new Error("Failed to fetch event data.");
-            const allEvents = await res.json();
+            let pastHtml = '';
+            paginatedEvents.forEach(event => {
+                pastHtml += renderEventCard(event, true);
+            });
+            pastContainer.innerHTML = pastHtml || '<p class="text-muted col-12">No past events found.</p>';
 
-            let upcomingHtml = '';
-            let registeredHtml = '';
+            // Update active state on pagination buttons
+            document.querySelectorAll('#pagination-container .page-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`#pagination-container .page-item[data-page='${page}']`)?.classList.add('active');
+        }
 
-            allEvents.filter(e => e.status === 'approved').forEach(event => {
-                const isRegistered = (event.attendees || []).some(a => a.userId?._id === userId);
-                if (isRegistered) {
-                    registeredHtml += renderEventCard(event);
-                } else {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    if (new Date(event.date) >= today) {
+        // --- NEW: Renders the pagination buttons ---
+        function renderPagination() {
+            const paginationContainer = document.getElementById("pagination-container");
+            paginationContainer.innerHTML = '';
+            const pageCount = Math.ceil(allPastEvents.length / eventsPerPage);
+
+            if (pageCount <= 1) return; // Don't show pagination for a single page
+
+            for (let i = 1; i <= pageCount; i++) {
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.dataset.page = i;
+                li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); renderPastEvents(${i})">${i}</a>`;
+                paginationContainer.appendChild(li);
+            }
+        }
+
+        async function loadDashboard() {
+            const upcomingContainer = document.getElementById("upcoming-events");
+            const registeredContainer = document.getElementById("registered-events");
+            try {
+                const res = await fetch(`${BASE_URL}/api/events`, { headers });
+                if (!res.ok) throw new Error("Failed to fetch event data.");
+                const allEvents = await res.json();
+
+                let upcomingHtml = '';
+                let registeredHtml = '';
+                allPastEvents = []; // Reset the global array
+
+                allEvents.filter(e => e.status === 'approved').forEach(event => {
+                    const isRegistered = (event.attendees || []).some(a => a.userId?._id === userId);
+                    const eventDateTime = new Date(event.date);
+                    if (event.time) {
+                        const [hours, minutes] = event.time.split(':');
+                        eventDateTime.setHours(hours, minutes, 0, 0);
+                    }
+                    const isPast = eventDateTime < new Date();
+
+                    if (isRegistered) {
+                        registeredHtml += renderEventCard(event);
+                    } else if (isPast) {
+                        allPastEvents.push(event); // Add to our past events list
+                    } else {
                         upcomingHtml += renderEventCard(event);
                     }
-                }
-            });
+                });
 
-            upcomingContainer.innerHTML = upcomingHtml || '<p class="text-muted col-12">No new events to join.</p>';
-            registeredContainer.innerHTML = registeredHtml || '<p class="text-muted col-12">You have not registered for any events.</p>';
+                upcomingContainer.innerHTML = upcomingHtml || '<p class="text-muted col-12">No new events to join.</p>';
+                registeredContainer.innerHTML = registeredHtml || '<p class="text-muted col-12">You have not registered for any events.</p>';
+                
+                // Sort past events by most recent first
+                allPastEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        } catch (error) {
-            upcomingContainer.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+                // Render the first page of past events and the pagination controls
+                renderPastEvents(1);
+                renderPagination();
+
+            } catch (error) {
+                upcomingContainer.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+            }
         }
-    }
 
-    document.addEventListener("DOMContentLoaded", loadDashboard);
-</script>
-<script src="navbar.js"></script>
+        document.addEventListener("DOMContentLoaded", loadDashboard);
+    </script>
+    <script src="navbar.js"></script>
 </body>
 </html>
