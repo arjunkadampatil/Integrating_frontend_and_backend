@@ -1,110 +1,478 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Event Details - EventSphere</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - EventSphere</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
- <header id="navbar-container"></header>
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
 
-  <div class="container mt-5" id="event-details-container">
-      <p class="text-center text-muted">Loading event details...</p>
-  </div>
-
-<script src="config.js"></script>
-<script>
-    const eventId = new URLSearchParams(window.location.search).get("id");
-    const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("userId");
-
-    function timeFormatter(timeStr) {
-        if (!timeStr) return 'N/A';
-        const [hour, minute] = timeStr.split(':');
-        return new Date(1970, 0, 1, hour, minute).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-    }
-
-    async function handleRegistration(e) {
-        e.preventDefault();
-        const registerBtn = e.target.querySelector("button[type='submit']");
-        registerBtn.disabled = true;
-        registerBtn.innerText = 'Processing...';
-
-        const collegeName = document.getElementById("collegeName")?.value.trim() || '';
-        try {
-            const res = await fetch(`${BASE_URL}/api/events/${eventId}/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ collegeName })
-            });
-            const result = await res.json();
-            if (!res.ok) throw new Error(result.error);
-            document.getElementById("message").innerText = '✅ Registered Successfully!';
-            registerBtn.className = 'btn btn-success w-100';
-            registerBtn.innerText = 'Registered';
-        } catch (error) {
-            document.getElementById("message").innerText = `❌ ${error.message}`;
-            registerBtn.disabled = false;
-            registerBtn.innerText = 'Register Now';
-        }
-    }
-
-    async function loadEventDetails() {
-        const container = document.getElementById('event-details-container');
-        try {
-            const res = await fetch(`${BASE_URL}/api/events`);
-            const events = await res.json();
-            const event = events.find(e => e._id === eventId);
-            if (!event) throw new Error('Event not found.');
-
-            const isRegistered = userId && (event.attendees || []).some(a => a.userId?._id === userId);
-            let regButtonHtml = `<button type="submit" class="btn btn-primary w-100">Register Now</button>`;
-            if (isRegistered) regButtonHtml = `<button class="btn btn-success w-100" disabled>Already Registered</button>`;
-            if (event.status !== 'approved') regButtonHtml = `<button class="btn btn-secondary w-100" disabled>Registration Closed</button>`;
-
-            // FIX: Display more event details in a structured list
-            container.innerHTML = `
-                <div class="row">
-                    <div class="col-md-8">
-                        <img src="${BASE_URL}${event.posterUrl}" class="img-fluid rounded mb-3 shadow-sm" onerror="this.style.display='none'">
-                        <h2>${event.title}</h2>
-                        <p class="text-muted">Organized by: ${event.createdBy?.name || 'University Staff'}</p>
-                        <hr>
-                        <p>${event.description}</p>
-                        <ul class="list-group list-group-flush mt-4">
-                            <li class="list-group-item"><strong>Date & Time:</strong> ${new Date(event.date).toLocaleDateString()} at ${timeFormatter(event.time)}</li>
-                            <li class="list-group-item"><strong>Venue:</strong> ${event.venue}</li>
-                            <li class="list-group-item"><strong>Mode:</strong> ${event.eventMode}</li>
-                            <li class="list-group-item"><strong>Event Type:</strong> ${event.type}</li>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="assets/logo.svg" alt="EventSphere" class="me-2">
+                <span class="fs-4 fw-bold">EventSphere</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="event.html">Events</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item" id="loginLink">
+                        <a class="nav-link" href="login.html">Login</a>
+                    </li>
+                    <li class="nav-item" id="signupLink">
+                        <a class="btn btn-primary ms-2" href="signup.html">Get Started</a>
+                    </li>
+                    <!-- User menu (hidden by default) -->
+                    <li class="nav-item dropdown" id="userMenu" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="userName">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end glass-dark">
+                            <li><a class="dropdown-item text-light" href="#" id="dashboardLink">Dashboard</a></li>
+                            <li><a class="dropdown-item text-light" href="profile.html">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-light" href="#" id="logoutLink">Logout</a></li>
                         </ul>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card shadow-sm">
-                          <div class="card-body">
-                            <h5 class="card-title">Registration Details</h5>
-                            <hr>
-                            <p><strong>Fee:</strong> ${event.registrationFee > 0 ? `$${event.registrationFee}`: 'Free'}</p>
-                            <p><strong>Slots Filled:</strong> ${(event.attendees || []).length} / ${event.registrationLimit > 0 ? event.registrationLimit : 'Unlimited'}</p>
-                            <form id="registration-form" class="mt-3">
-                              ${(event.type === 'Inter College' && !isRegistered) ? `<div class="mb-3"><label class="form-label">College Name</label><input type="text" id="collegeName" class="form-control" required></div>` : ''}
-                              ${regButtonHtml}
-                              <p id="message" class="mt-2 text-center"></p>
-                            </form>
-                          </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Events Header -->
+    <section class="py-5 mt-5" style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'); background-size: cover; background-position: center;">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center" data-aos="fade-up">
+                    <h1 class="display-4 fw-bold mb-4">Discover Amazing Events</h1>
+                    <p class="lead text-light">Find and register for events that match your interests</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters and Search -->
+    <section class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="glass p-4 rounded-4" data-aos="fade-up">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-lg-4 col-md-6">
+                                <label for="searchInput" class="form-label text-white">
+                                    <i class="fas fa-search me-2"></i>Search Events
+                                </label>
+                                <input type="text" class="form-control" id="searchInput" placeholder="Search by event name or description">
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <label for="categoryFilter" class="form-label text-white">
+                                    <i class="fas fa-filter me-2"></i>Category
+                                </label>
+                                <select class="form-select" id="categoryFilter">
+                                    <option value="">All Categories</option>
+                                    <option value="Technical">Technical</option>
+                                    <option value="Cultural">Cultural</option>
+                                    <option value="Sports">Sports</option>
+                                    <option value="Academic">Academic</option>
+                                    <option value="Workshop">Workshop</option>
+                                    <option value="Seminar">Seminar</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <label for="typeFilter" class="form-label text-white">
+                                    <i class="fas fa-tags me-2"></i>Event Type
+                                </label>
+                                <select class="form-select" id="typeFilter">
+                                    <option value="">All Types</option>
+                                    <option value="Intercollege">Intercollege</option>
+                                    <option value="Intracollege">Intracollege</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6">
+                                <button class="btn btn-secondary w-100" id="clearFilters">
+                                    <i class="fas fa-times me-2"></i>Clear
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>`;
-            
-            document.getElementById('registration-form').addEventListener('submit', handleRegistration);
-        } catch (error) { 
-            container.innerHTML = `<p class="text-danger text-center"><strong>Error:</strong> ${error.message}</p>`; 
-        }
-    }
+                </div>
+            </div>
+        </div>
+    </section>
 
-    document.addEventListener("DOMContentLoaded", loadEventDetails);
-</script>
-<script src="navbar.js"></script>
+    <!-- Events Grid -->
+    <section class="py-5">
+        <div class="container">
+            <!-- Loading Spinner -->
+            <div class="loading-spinner text-center" id="eventsLoading">
+                <div class="spinner"></div>
+                <p>Loading events...</p>
+            </div>
+
+            <!-- Events Container -->
+            <div class="row g-4" id="eventsContainer">
+                <!-- Events will be loaded dynamically -->
+            </div>
+
+            <!-- No Events Message -->
+            <div class="col-12 text-center" id="noEventsMessage" style="display: none;">
+                <div class="glass p-5 rounded-4" data-aos="fade-up">
+                    <i class="fas fa-calendar-times fa-3x mb-3" style="color: #6b7280;"></i>
+                    <h4>No Events Found</h4>
+                    <p class="text-light">Try adjusting your search criteria or check back later for new events.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Event Registration Modal -->
+    <div class="modal fade" id="registrationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-ticket-alt me-2"></i>Event Registration
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="eventDetails">
+                        <!-- Event details will be loaded here -->
+                    </div>
+                    
+                    <!-- Registration Form -->
+                    <form id="registrationForm" style="display: none;">
+                        <div class="mb-3">
+                            <label for="regName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="regName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="regEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="regEmail" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="regPhone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="regPhone" name="phone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="regStudentId" class="form-label">Student ID</label>
+                            <input type="text" class="form-control" id="regStudentId" name="studentId" required>
+                        </div>
+                        <input type="hidden" id="regEventId" name="eventId">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="registerBtn" style="display: none;">
+                        <i class="fas fa-check me-2"></i>Register for Event
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation JS -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <!-- Custom JS -->
+    <script src="config.js"></script>
+    <script src="navbar.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        let allEvents = [];
+        let filteredEvents = [];
+
+        // Load events
+        async function loadEvents() {
+            const eventsContainer = document.getElementById('eventsContainer');
+            const loadingSpinner = document.getElementById('eventsLoading');
+            const noEventsMessage = document.getElementById('noEventsMessage');
+            
+            loadingSpinner.style.display = 'block';
+            noEventsMessage.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/events`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    allEvents = data.events;
+                    filteredEvents = [...allEvents];
+                    renderEvents();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error loading events:', error);
+                eventsContainer.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="glass p-5 rounded-4">
+                            <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color: #f59e0b;"></i>
+                            <h4>Unable to Load Events</h4>
+                            <p class="text-light">Please check your internet connection and try again.</p>
+                            <button class="btn btn-primary" onclick="loadEvents()">
+                                <i class="fas fa-redo me-2"></i>Retry
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Render events
+        function renderEvents() {
+            const eventsContainer = document.getElementById('eventsContainer');
+            const noEventsMessage = document.getElementById('noEventsMessage');
+            
+            if (filteredEvents.length === 0) {
+                eventsContainer.innerHTML = '';
+                noEventsMessage.style.display = 'block';
+                return;
+            }
+            
+            noEventsMessage.style.display = 'none';
+            
+            eventsContainer.innerHTML = filteredEvents.map((event, index) => `
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="${index * 100}">
+                    <div class="event-card">
+                        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="${event.eventName}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="badge ${event.eventType === 'Intercollege' ? 'badge-intercollege' : 'badge-intracollege'}">${event.eventType}</span>
+                                <span class="badge ${getStatusBadgeClass(event.status)}">${event.status}</span>
+                            </div>
+                            ${event.category ? `<small class="text-muted"><i class="fas fa-tag me-1"></i>${event.category}</small>` : ''}
+                            <h5 class="card-title fw-bold mt-2">${event.eventName}</h5>
+                            <p class="card-text text-light">${event.description?.substring(0, 100) || 'No description available'}${event.description?.length > 100 ? '...' : ''}</p>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-light">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        ${new Date(event.eventDate).toLocaleDateString()}
+                                    </small>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-light">
+                                        <i class="fas fa-clock me-1"></i>
+                                        ${event.eventTime || 'TBA'}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <small class="text-light">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        ${event.venue || 'Venue TBA'}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            ${event.registrationFee ? `
+                                <div class="mb-3">
+                                    <small class="text-warning">
+                                        <i class="fas fa-rupee-sign me-1"></i>
+                                        Registration Fee: ₹${event.registrationFee}
+                                    </small>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary flex-fill" onclick="openRegistrationModal('${event._id}')" ${event.status !== 'approved' ? 'disabled' : ''}>
+                                    <i class="fas fa-ticket-alt me-2"></i>
+                                    ${event.status === 'approved' ? 'Register' : 'Not Available'}
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="viewEventDetails('${event._id}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get status badge class
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'approved': return 'badge-approved';
+                case 'pending': return 'badge-pending';
+                case 'rejected': return 'badge-rejected';
+                default: return 'badge-pending';
+            }
+        }
+
+        // Filter events
+        function filterEvents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+            const type = document.getElementById('typeFilter').value;
+            
+            filteredEvents = allEvents.filter(event => {
+                const matchesSearch = !searchTerm || 
+                    event.eventName.toLowerCase().includes(searchTerm) ||
+                    (event.description && event.description.toLowerCase().includes(searchTerm));
+                
+                const matchesCategory = !category || event.category === category;
+                const matchesType = !type || event.eventType === type;
+                
+                return matchesSearch && matchesCategory && matchesType;
+            });
+            
+            renderEvents();
+        }
+
+        // Open registration modal
+        async function openRegistrationModal(eventId) {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                alert('Please login to register for events');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/events/${eventId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const event = data.event;
+                    const modal = new bootstrap.Modal(document.getElementById('registrationModal'));
+                    
+                    document.getElementById('eventDetails').innerHTML = `
+                        <div class="glass p-4 rounded-3 mb-4">
+                            <h4>${event.eventName}</h4>
+                            <p class="text-light">${event.description}</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-light"><i class="fas fa-calendar me-1"></i> ${new Date(event.eventDate).toLocaleDateString()}</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-light"><i class="fas fa-map-marker-alt me-1"></i> ${event.venue}</small>
+                                </div>
+                            </div>
+                            ${event.registrationFee ? `
+                                <div class="mt-2">
+                                    <small class="text-warning"><i class="fas fa-rupee-sign me-1"></i> Fee: ₹${event.registrationFee}</small>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    // Pre-fill form if user data is available
+                    const userName = localStorage.getItem('userName');
+                    if (userName) {
+                        document.getElementById('regName').value = userName;
+                    }
+                    
+                    document.getElementById('regEventId').value = eventId;
+                    document.getElementById('registrationForm').style.display = 'block';
+                    document.getElementById('registerBtn').style.display = 'block';
+                    
+                    modal.show();
+                }
+            } catch (error) {
+                console.error('Error loading event details:', error);
+                alert('Error loading event details');
+            }
+        }
+
+        // View event details
+        function viewEventDetails(eventId) {
+            // You can implement a detailed view here
+            console.log('View details for event:', eventId);
+        }
+
+        // Handle registration
+        document.getElementById('registerBtn').addEventListener('click', async function() {
+            const form = document.getElementById('registrationForm');
+            const formData = new FormData(form);
+            const registrationData = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/events/${registrationData.eventId}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+                    },
+                    body: JSON.stringify(registrationData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Registration successful!');
+                    bootstrap.Modal.getInstance(document.getElementById('registrationModal')).hide();
+                } else {
+                    alert(data.message || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Network error. Please try again.');
+            }
+        });
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterEvents);
+        document.getElementById('categoryFilter').addEventListener('change', filterEvents);
+        document.getElementById('typeFilter').addEventListener('change', filterEvents);
+        
+        document.getElementById('clearFilters').addEventListener('click', function() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            filteredEvents = [...allEvents];
+            renderEvents();
+        });
+
+        // Load events on page load
+        document.addEventListener('DOMContentLoaded', loadEvents);
+    </script>
 </body>
 </html>

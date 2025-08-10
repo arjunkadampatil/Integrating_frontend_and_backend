@@ -1,77 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Login - EventSphere</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EventSphere</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-md-5">
-        <div class="card shadow-sm">
-          <div class="card-body p-4">
-            <h2 class="text-center mb-4">Login to EventSphere</h2>
-            <form id="login-form">
-              <div class="mb-3">
-                <label for="email" class="form-label">Email address</label>
-                <input type="email" class="form-control" id="email" required>
-              </div>
-              <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" required>
-              </div>
-              <button type="submit" class="btn btn-primary w-100">Login</button>
-            </form>
-            <p class="text-center mt-3">Don't have an account? <a href="signup.html">Sign up</a></p>
-            <p id="login-error" class="text-danger text-center mt-2" style="display: none;"></p>
-          </div>
-        </div>
-      </div>
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
     </div>
-  </div>
 
-<script src="config.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("login-form").addEventListener("submit", async function (e) {
-            e.preventDefault();
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value.trim();
-            const errorMsg = document.getElementById("login-error");
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="assets/logo.svg" alt="EventSphere" class="me-2">
+                <span class="fs-4 fw-bold">EventSphere</span>
+            </a>
+            
+            <div class="ms-auto">
+                <a href="index.html" class="btn btn-outline-primary">
+                    <i class="fas fa-home me-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </nav>
 
-            try {
-                const res = await fetch(`${BASE_URL}/api/auth/login`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password }),
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Login failed.");
+    <!-- Login Form Container -->
+    <div class="form-container">
+        <div class="container">
+            <div class="row justify-content-center align-items-center min-vh-100">
+                <div class="col-lg-5 col-md-7 col-sm-9">
+                    <div class="form-glass" data-aos="zoom-in" data-aos-duration="800">
+                        <!-- Logo and Title -->
+                        <div class="text-center mb-4">
+                            <img src="assets/logo.svg" alt="EventSphere" style="height: 60px;" class="mb-3">
+                            <h2 class="fw-bold mb-2">Welcome Back!</h2>
+                            <p class="text-light">Sign in to access your EventSphere account</p>
+                        </div>
 
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("userId", data.user._id);
-                localStorage.setItem("role", data.user.role);
-                localStorage.setItem("name", data.user.name);
-                localStorage.setItem("email", data.user.email);
+                        <!-- Alert Messages -->
+                        <div id="alert-container"></div>
 
-                // Reverted to simple, reliable relative paths
-                if (data.user.role === "admin") {
-                    window.location.href = "admin-dashborad.html";
-                } else if (data.user.role === "club") {
-                    window.location.href = "club-dashborad.html";
-                } else {
-                    window.location.href = "student-dashboard.html";
-                }
-            } catch (err) {
-                errorMsg.textContent = "❌ " + err.message;
-                errorMsg.style.display = "block";
+                        <!-- Login Form -->
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>Email Address
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>Password
+                                </label>
+                                <div class="position-relative">
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                                    <button type="button" class="btn position-absolute end-0 top-0 h-100 border-0 bg-transparent text-light" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="role" class="form-label">
+                                    <i class="fas fa-user-tag me-2"></i>Role
+                                </label>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="">Select your role</option>
+                                    <option value="student">🎓 Student</option>
+                                    <option value="club">🏛️ Club/Organization</option>
+                                    <option value="admin">👨‍💼 Administrator</option>
+                                </select>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
+                                    <label class="form-check-label text-light" for="rememberMe">
+                                        Remember me
+                                    </label>
+                                </div>
+                                <a href="forgot-password.html" class="text-decoration-none" style="color: #3b82f6;">
+                                    Forgot Password?
+                                </a>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 mb-3" id="loginBtn">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </button>
+
+                            <div class="text-center">
+                                <p class="text-light mb-0">
+                                    Don't have an account? 
+                                    <a href="signup.html" class="text-decoration-none fw-bold" style="color: #3b82f6;">
+                                        Create Account
+                                    </a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation JS -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <!-- Custom JS -->
+    <script src="config.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Toggle Password Visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         });
-    });
-</script>
-<script src="navbar.js"></script>
+
+        // Show Alert Function
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Handle Login Form Submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loginBtn = document.getElementById('loginBtn');
+            const originalText = loginBtn.innerHTML;
+            
+            // Show loading state
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing In...';
+            loginBtn.disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                const loginData = Object.fromEntries(formData.entries());
+                
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store user data and token
+                    localStorage.setItem('userToken', data.token);
+                    localStorage.setItem('userRole', data.user.role);
+                    localStorage.setItem('userId', data.user.id);
+                    localStorage.setItem('userName', data.user.name);
+                    
+                    showAlert('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect based on role
+                    setTimeout(() => {
+                        switch(data.user.role) {
+                            case 'student':
+                                window.location.href = 'student-dashboard.html';
+                                break;
+                            case 'club':
+                                window.location.href = 'club-dashboard.html';
+                                break;
+                            case 'admin':
+                                window.location.href = 'admin-dashboard.html';
+                                break;
+                            default:
+                                window.location.href = 'index.html';
+                        }
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Login failed. Please check your credentials.', 'danger');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Network error. Please check your connection and try again.', 'danger');
+            } finally {
+                // Reset button state
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('userToken');
+            const role = localStorage.getItem('userRole');
+            
+            if (token && role) {
+                // Redirect to appropriate dashboard
+                switch(role) {
+                    case 'student':
+                        window.location.href = 'student-dashboard.html';
+                        break;
+                    case 'club':
+                        window.location.href = 'club-dashboard.html';
+                        break;
+                    case 'admin':
+                        window.location.href = 'admin-dashboard.html';
+                        break;
+                }
+            }
+        });
+
+        // Form validation enhancements
+        const form = document.getElementById('loginForm');
+        const inputs = form.querySelectorAll('input, select');
+        
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                this.classList.remove('is-invalid', 'is-valid');
+            });
+        });
+    </script>
 </body>
 </html>

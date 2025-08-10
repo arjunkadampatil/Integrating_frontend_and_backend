@@ -2,185 +2,547 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - EventSphere</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header id="navbar-container"></header>
-    <div class="container mt-4">
-        <h3>Upcoming Events</h3>
-        <div class="row" id="upcoming-events"><p class="text-muted">Loading...</p></div>
-        
-        <h3 class="mt-5">Your Registered Events</h3>
-        <div class="row" id="registered-events"><p class="text-muted">Loading...</p></div>
-
-        <h3 class="mt-5">Past Events</h3>
-        <div class="row" id="past-events"><p class="text-muted">Loading...</p></div>
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center mt-4" id="pagination-container">
-            </ul>
-        </nav>
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
     </div>
 
-    <script src="config.js"></script>
-    <script>
-        const userId = localStorage.getItem("userId");
-        if (!userId) window.location.href = "login.html";
-
-        const headers = { 'Authorization': `Bearer ${localStorage.getItem('token')}` };
-        let allPastEvents = []; // Store all past events for pagination
-        const eventsPerPage = 6; // Show 6 past events per page
-
-        // --- NEW: Direct Registration from Dashboard ---
-        async function handleDirectRegistration(eventId, eventTitle, buttonElement) {
-            if (!confirm(`Are you sure you want to register for "${eventTitle}"?`)) {
-                return;
-            }
-            buttonElement.disabled = true;
-            buttonElement.innerText = 'Registering...';
-            try {
-                const res = await fetch(`${BASE_URL}/api/events/${eventId}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', ...headers },
-                    body: JSON.stringify({ collegeName: 'N/A' }) // College name not needed for non-inter-college events here
-                });
-                const result = await res.json();
-                if (!res.ok) throw new Error(result.error);
-                
-                // Success: Visually move the card
-                alert('Successfully registered!');
-                loadDashboard(); // Reload the entire dashboard to move the card
-            } catch (error) {
-                alert(`Registration failed: ${error.message}`);
-                buttonElement.disabled = false;
-                buttonElement.innerText = 'Register';
-            }
-        }
-        
-        async function downloadCertificate(eventId, eventTitle) { /* This function is correct and remains intact */ }
-
-        // --- UPDATED: Renders cards with new button logic ---
-        function renderEventCard(event, isForPastEvents = false) {
-            if (!event || !event.title) return '';
-
-            const isRegistered = (event.attendees || []).some(a => a.userId?._id === userId);
-            const hasAttended = isRegistered && (event.attendees || []).find(a => a.userId?._id === userId)?.isAttended;
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="assets/logo.svg" alt="EventSphere" class="me-2">
+                <span class="fs-4 fw-bold">EventSphere</span>
+            </a>
             
-            let buttonHtml;
-            if (isRegistered) {
-                buttonHtml = (hasAttended)
-                    ? `<button onclick="downloadCertificate('${event._id}', \`${event.title}\`)" class="btn btn-success w-100 mt-auto">Download Certificate</button>`
-                    : `<a href="event.html?id=${event._id}" class="btn btn-info w-100 mt-auto">View Details</a>`;
-            } else if (isForPastEvents) {
-                buttonHtml = `<button class="btn btn-secondary w-100 mt-auto" disabled>Event Over</button>`;
-            } else {
-                buttonHtml = `<div class="d-grid gap-2 mt-auto">
-                                 <a href="event.html?id=${event._id}" class="btn btn-outline-primary">View Details</a>
-                                 <button onclick="handleDirectRegistration('${event._id}', \`${event.title}\`, this)" class="btn btn-primary">Register</button>
-                               </div>`;
-            }
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="event.html">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="student-dashboard.html">Dashboard</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown" id="userMenu">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="userName">Student</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end glass-dark">
+                            <li><a class="dropdown-item text-light" href="student-dashboard.html">Dashboard</a></li>
+                            <li><a class="dropdown-item text-light" href="profile.html">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-light" href="#" id="logoutLink">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-            return `
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        <img src="${BASE_URL}${event.posterUrl}" class="card-img-top" style="height: 200px; object-fit: cover;" onerror="this.onerror=null;this.src='https://via.placeholder.com/400x200.png?text=EventSphere';">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">${event.title}</h5>
-                            <p class="card-text"><small class="text-muted">${new Date(event.date).toLocaleDateString()}</small></p>
-                            ${buttonHtml}
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <div class="container-fluid px-4 py-5">
+            <!-- Welcome Section -->
+            <div class="row mt-5 mb-4">
+                <div class="col-12">
+                    <div class="glass p-4 rounded-4" data-aos="fade-up">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap">
+                            <div>
+                                <h1 class="h2 fw-bold mb-2">
+                                    <i class="fas fa-graduation-cap me-3" style="color: #3b82f6;"></i>
+                                    Welcome back, <span id="welcomeName">Student</span>!
+                                </h1>
+                                <p class="text-light mb-0">Manage your event registrations and certificates</p>
+                            </div>
+                            <div class="text-end">
+                                <a href="event.html" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Browse Events
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>`;
-        }
-        
-        // --- NEW: Renders a specific page of past events ---
-        function renderPastEvents(page) {
-            const pastContainer = document.getElementById("past-events");
-            pastContainer.innerHTML = '';
-            
-            const start = (page - 1) * eventsPerPage;
-            const end = start + eventsPerPage;
-            const paginatedEvents = allPastEvents.slice(start, end);
+                </div>
+            </div>
 
-            let pastHtml = '';
-            paginatedEvents.forEach(event => {
-                pastHtml += renderEventCard(event, true);
-            });
-            pastContainer.innerHTML = pastHtml || '<p class="text-muted col-12">No past events found.</p>';
-
-            // Update active state on pagination buttons
-            document.querySelectorAll('#pagination-container .page-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.querySelector(`#pagination-container .page-item[data-page='${page}']`)?.classList.add('active');
-        }
-
-        // --- NEW: Renders the pagination buttons ---
-        function renderPagination() {
-            const paginationContainer = document.getElementById("pagination-container");
-            paginationContainer.innerHTML = '';
-            const pageCount = Math.ceil(allPastEvents.length / eventsPerPage);
-
-            if (pageCount <= 1) return; // Don't show pagination for a single page
-
-            for (let i = 1; i <= pageCount; i++) {
-                const li = document.createElement('li');
-                li.className = 'page-item';
-                li.dataset.page = i;
-                li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); renderPastEvents(${i})">${i}</a>`;
-                paginationContainer.appendChild(li);
-            }
-        }
-
-        async function loadDashboard() {
-            const upcomingContainer = document.getElementById("upcoming-events");
-            const registeredContainer = document.getElementById("registered-events");
-            try {
-                const res = await fetch(`${BASE_URL}/api/events`, { headers });
-                if (!res.ok) throw new Error("Failed to fetch event data.");
-                const allEvents = await res.json();
-
-                let upcomingHtml = '';
-                let registeredHtml = '';
-                allPastEvents = []; // Reset the global array
-
-                allEvents.filter(e => e.status === 'approved').forEach(event => {
-                    const isRegistered = (event.attendees || []).some(a => a.userId?._id === userId);
-                    const eventDateTime = new Date(event.date);
-                    if (event.time) {
-                        const [hours, minutes] = event.time.split(':');
-                        eventDateTime.setHours(hours, minutes, 0, 0);
-                    }
-                    const isPast = eventDateTime < new Date();
-
-                    if (isRegistered) {
-                        registeredHtml += renderEventCard(event);
-                    } else if (isPast) {
-                        allPastEvents.push(event); // Add to our past events list
-                    } else {
-                        upcomingHtml += renderEventCard(event);
-                    }
-                });
-
-                upcomingContainer.innerHTML = upcomingHtml || '<p class="text-muted col-12">No new events to join.</p>';
-                registeredContainer.innerHTML = registeredHtml || '<p class="text-muted col-12">You have not registered for any events.</p>';
+            <!-- Stats Cards -->
+            <div class="row g-4 mb-5">
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stats-card">
+                        <i class="fas fa-ticket-alt fa-3x mb-3" style="color: #3b82f6;"></i>
+                        <div class="stats-number" id="totalRegistrations">0</div>
+                        <div class="stats-label">Total Events Registered</div>
+                    </div>
+                </div>
                 
-                // Sort past events by most recent first
-                allPastEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stats-card">
+                        <i class="fas fa-check-circle fa-3x mb-3" style="color: #10b981;"></i>
+                        <div class="stats-number" id="attendedEvents">0</div>
+                        <div class="stats-label">Events Attended</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stats-card">
+                        <i class="fas fa-certificate fa-3x mb-3" style="color: #f59e0b;"></i>
+                        <div class="stats-number" id="certificatesEarned">0</div>
+                        <div class="stats-label">Certificates Earned</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="stats-card">
+                        <i class="fas fa-calendar-week fa-3x mb-3" style="color: #8b5cf6;"></i>
+                        <div class="stats-number" id="upcomingEvents">0</div>
+                        <div class="stats-label">Upcoming Events</div>
+                    </div>
+                </div>
+            </div>
 
-                // Render the first page of past events and the pagination controls
-                renderPastEvents(1);
-                renderPagination();
+            <!-- Registered Events Section -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="glass p-4 rounded-4" data-aos="fade-up">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <h3 class="fw-bold mb-0">
+                                <i class="fas fa-list-alt me-2"></i>My Registered Events
+                            </h3>
+                            <div class="d-flex gap-2">
+                                <select class="form-select" id="statusFilter" style="width: auto;">
+                                    <option value="">All Status</option>
+                                    <option value="upcoming">Upcoming</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
 
+                        <!-- Loading Spinner -->
+                        <div class="loading-spinner text-center" id="eventsLoading">
+                            <div class="spinner"></div>
+                            <p>Loading your events...</p>
+                        </div>
+
+                        <!-- Events Table -->
+                        <div class="table-responsive" id="eventsTableContainer" style="display: none;">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Event Name</th>
+                                        <th>Date & Time</th>
+                                        <th>Venue</th>
+                                        <th>Status</th>
+                                        <th>Type</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="eventsTableBody">
+                                    <!-- Events will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- No Events Message -->
+                        <div class="text-center py-5" id="noEventsMessage" style="display: none;">
+                            <i class="fas fa-calendar-times fa-3x mb-3" style="color: #6b7280;"></i>
+                            <h5>No Events Found</h5>
+                            <p class="text-light">You haven't registered for any events yet.</p>
+                            <a href="event.html" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Browse Events
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div class="modal fade" id="eventDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle me-2"></i>Event Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="eventDetailsContent">
+                    <!-- Event details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificate Modal -->
+    <div class="modal fade" id="certificateModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-certificate me-2"></i>Download Certificate
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center" id="certificateContent">
+                    <!-- Certificate content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation JS -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <!-- Custom JS -->
+    <script src="config.js"></script>
+    <script src="navbar.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        let registeredEvents = [];
+
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('userToken');
+            const role = localStorage.getItem('userRole');
+            
+            if (!token || role !== 'student') {
+                Utils.showToast('Access denied. Please login as a student.', 'danger');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set user name
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('welcomeName').textContent = userName;
+            }
+            
+            loadDashboardData();
+        });
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                await Promise.all([
+                    loadRegisteredEvents(),
+                    loadDashboardStats()
+                ]);
             } catch (error) {
-                upcomingContainer.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+                console.error('Error loading dashboard data:', error);
+                Utils.showToast('Error loading dashboard data', 'danger');
             }
         }
 
-        document.addEventListener("DOMContentLoaded", loadDashboard);
+        // Load registered events
+        async function loadRegisteredEvents() {
+            const loadingSpinner = document.getElementById('eventsLoading');
+            const tableContainer = document.getElementById('eventsTableContainer');
+            const noEventsMessage = document.getElementById('noEventsMessage');
+            
+            loadingSpinner.style.display = 'block';
+            tableContainer.style.display = 'none';
+            noEventsMessage.style.display = 'none';
+            
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/user/registered-events`);
+                
+                if (response && response.success) {
+                    registeredEvents = response.events || [];
+                    renderEvents();
+                } else {
+                    throw new Error(response?.message || 'Failed to load events');
+                }
+            } catch (error) {
+                console.error('Error loading registered events:', error);
+                Utils.showToast('Error loading registered events', 'danger');
+                noEventsMessage.style.display = 'block';
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/user/dashboard`);
+                
+                if (response && response.success) {
+                    const stats = response.stats;
+                    document.getElementById('totalRegistrations').textContent = stats.totalRegistrations || 0;
+                    document.getElementById('attendedEvents').textContent = stats.attendedEvents || 0;
+                    document.getElementById('certificatesEarned').textContent = stats.certificatesEarned || 0;
+                    document.getElementById('upcomingEvents').textContent = stats.upcomingEvents || 0;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        // Render events table
+        function renderEvents() {
+            const tableBody = document.getElementById('eventsTableBody');
+            const tableContainer = document.getElementById('eventsTableContainer');
+            const noEventsMessage = document.getElementById('noEventsMessage');
+            
+            if (registeredEvents.length === 0) {
+                tableContainer.style.display = 'none';
+                noEventsMessage.style.display = 'block';
+                return;
+            }
+            
+            tableContainer.style.display = 'block';
+            noEventsMessage.style.display = 'none';
+            
+            tableBody.innerHTML = registeredEvents.map(event => {
+                const eventDate = new Date(event.eventDate);
+                const isUpcoming = eventDate > new Date();
+                const status = isUpcoming ? 'upcoming' : 'completed';
+                
+                return `
+                    <tr>
+                        <td>
+                            <strong>${event.eventName}</strong>
+                            <br>
+                            <small class="text-muted">${Utils.truncateText(event.description, 50)}</small>
+                        </td>
+                        <td>
+                            <i class="fas fa-calendar me-1"></i>
+                            ${Utils.formatDate(event.eventDate)}<br>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                ${event.eventTime || 'TBA'}
+                            </small>
+                        </td>
+                        <td>
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            ${event.venue || 'TBA'}
+                        </td>
+                        <td>
+                            <span class="badge ${status === 'upcoming' ? 'badge-pending' : 'badge-approved'}">
+                                ${status.charAt(0).toUpperCase() + status.slice(1)}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge ${event.eventType === 'Intercollege' ? 'badge-intercollege' : 'badge-intracollege'}">
+                                ${event.eventType}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewEventDetails('${event._id}')" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                ${!isUpcoming ? `
+                                    <button class="btn btn-sm certificate-btn" onclick="downloadCertificate('${event._id}')" title="Download Certificate">
+                                        <i class="fas fa-certificate"></i>
+                                    </button>
+                                ` : ''}
+                                ${isUpcoming ? `
+                                    <button class="btn btn-sm btn-secondary" onclick="generateQR('${event._id}')" title="QR Code">
+                                        <i class="fas fa-qrcode"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Filter events
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            const filter = this.value;
+            const currentDate = new Date();
+            
+            let filtered = registeredEvents;
+            
+            if (filter === 'upcoming') {
+                filtered = registeredEvents.filter(event => new Date(event.eventDate) > currentDate);
+            } else if (filter === 'completed') {
+                filtered = registeredEvents.filter(event => new Date(event.eventDate) <= currentDate);
+            }
+            
+            // Update the rendered events
+            const tableBody = document.getElementById('eventsTableBody');
+            const tableContainer = document.getElementById('eventsTableContainer');
+            const noEventsMessage = document.getElementById('noEventsMessage');
+            
+            if (filtered.length === 0) {
+                tableContainer.style.display = 'none';
+                noEventsMessage.style.display = 'block';
+                return;
+            }
+            
+            // Re-render with filtered data
+            const originalEvents = registeredEvents;
+            registeredEvents = filtered;
+            renderEvents();
+            registeredEvents = originalEvents;
+        });
+
+        // View event details
+        async function viewEventDetails(eventId) {
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/events/${eventId}`);
+                
+                if (response && response.success) {
+                    const event = response.event;
+                    const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+                    
+                    document.getElementById('eventDetailsContent').innerHTML = `
+                        <div class="glass p-4 rounded-3">
+                            <h4>${event.eventName}</h4>
+                            <p class="text-light">${event.description}</p>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-calendar me-2"></i>Date & Time</h6>
+                                    <p>${Utils.formatDate(event.eventDate)} at ${event.eventTime || 'TBA'}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-map-marker-alt me-2"></i>Venue</h6>
+                                    <p>${event.venue || 'To be announced'}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-tag me-2"></i>Category</h6>
+                                    <p>${event.category || 'General'}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-users me-2"></i>Type</h6>
+                                    <p>${event.eventType}</p>
+                                </div>
+                            </div>
+                            
+                            ${event.registrationFee ? `
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6><i class="fas fa-rupee-sign me-2"></i>Registration Fee</h6>
+                                        <p>₹${event.registrationFee}</p>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            ${event.organizer ? `
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h6><i class="fas fa-user me-2"></i>Organized by</h6>
+                                        <p>${event.organizer}</p>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    modal.show();
+                }
+            } catch (error) {
+                console.error('Error loading event details:', error);
+                Utils.showToast('Error loading event details', 'danger');
+            }
+        }
+
+        // Download certificate
+        async function downloadCertificate(eventId) {
+            try {
+                const modal = new bootstrap.Modal(document.getElementById('certificateModal'));
+                
+                document.getElementById('certificateContent').innerHTML = `
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Generating certificate...</p>
+                    </div>
+                `;
+                
+                modal.show();
+                
+                const response = await Utils.apiRequest(`${API_BASE_URL}/certificate/generate/${eventId}`, {
+                    method: 'POST'
+                });
+                
+                if (response && response.success) {
+                    document.getElementById('certificateContent').innerHTML = `
+                        <div class="glass p-4 rounded-3">
+                            <i class="fas fa-certificate fa-4x mb-4" style="color: #f59e0b;"></i>
+                            <h4>Certificate Ready!</h4>
+                            <p class="text-light">Your participation certificate has been generated successfully.</p>
+                            <div class="d-flex gap-3 justify-content-center mt-4">
+                                <a href="${response.certificateUrl}" class="btn btn-primary" download>
+                                    <i class="fas fa-download me-2"></i>Download Certificate
+                                </a>
+                                <button class="btn btn-secondary" onclick="window.open('${response.certificateUrl}', '_blank')">
+                                    <i class="fas fa-eye me-2"></i>Preview
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(response?.message || 'Failed to generate certificate');
+                }
+            } catch (error) {
+                console.error('Error generating certificate:', error);
+                document.getElementById('certificateContent').innerHTML = `
+                    <div class="glass p-4 rounded-3">
+                        <i class="fas fa-exclamation-triangle fa-4x mb-4" style="color: #ef4444;"></i>
+                        <h4>Certificate Not Available</h4>
+                        <p class="text-light">Certificate generation failed or you may not be eligible for this certificate yet.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Generate QR code
+        function generateQR(eventId) {
+            window.location.href = `qr-attendance.html?eventId=${eventId}`;
+        }
     </script>
-    <script src="navbar.js"></script>
 </body>
 </html>

@@ -1,88 +1,409 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Signup - EventSphere</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - EventSphere</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-md-5">
-        <div class="card shadow-sm">
-          <div class="card-body p-4">
-            <h2 class="text-center mb-4">Create Your Student Account</h2>
-            <form id="signup-form">
-              <div class="mb-3">
-                <label for="name" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="name" required>
-              </div>
-              <div class="mb-3">
-                <label for="signupEmail" class="form-label">University Email</label>
-                <input type="email" class="form-control" id="signupEmail" required>
-              </div>
-              <div class="mb-3">
-                <label for="signupPassword" class="form-label">Password</label>
-                <input type="password" class="form-control" id="signupPassword" required>
-              </div>
-              <button type="submit" class="btn btn-success w-100">Sign Up</button>
-              
-              <div class="d-grid my-3">
-                  <button type="button" onclick="window.location.href=BASE_URL + '/api/auth/google'" class="btn btn-danger">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-google" viewBox="0 0 16 16" style="vertical-align: -0.125em;">
-                          <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.25C2.898 7.213 2.5 8.334 2.5 9.5s.398 2.287 1.008 3.084C4.14 14.592 5.912 16 8 16c1.669 0 3.078-.51 4.1-1.318l2.553 2.553C13.523 18.292 11.026 19 8 19a8.5 8.5 0 1 1 8.5-8.5c0-.622-.057-1.24-.162-1.84z"/>
-                      </svg>
-                      Sign Up with Google
-                  </button>
-              </div>
-              <p class="text-center mt-3">Already have an account? <a href="login.html">Login</a></p>
-            </form>
-            <p class="text-success mt-2 text-center" id="signup-success" style="display:none;"></p>
-            <p class="text-danger mt-2 text-center" id="signup-error" style="display:none;"></p>
-          </div>
-        </div>
-      </div>
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
     </div>
-  </div>
 
-<script src="config.js"></script>
-<script>
-    document.getElementById("signup-form").addEventListener("submit", async function (e) {
-      e.preventDefault();
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="assets/logo.svg" alt="EventSphere" class="me-2">
+                <span class="fs-4 fw-bold">EventSphere</span>
+            </a>
+            
+            <div class="ms-auto">
+                <a href="index.html" class="btn btn-outline-primary">
+                    <i class="fas fa-home me-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </nav>
 
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("signupEmail").value.trim();
-      const password = document.getElementById("signupPassword").value.trim();
-      
-      const successMsg = document.getElementById("signup-success");
-      const errorMsg = document.getElementById("signup-error");
-      successMsg.style.display = "none";
-      errorMsg.style.display = "none";
+    <!-- Signup Form Container -->
+    <div class="form-container">
+        <div class="container">
+            <div class="row justify-content-center align-items-center min-vh-100 py-5">
+                <div class="col-lg-6 col-md-8 col-sm-10">
+                    <div class="form-glass" data-aos="zoom-in" data-aos-duration="800">
+                        <!-- Logo and Title -->
+                        <div class="text-center mb-4">
+                            <img src="assets/logo.svg" alt="EventSphere" style="height: 60px;" class="mb-3">
+                            <h2 class="fw-bold mb-2">Join EventSphere</h2>
+                            <p class="text-light">Create your account and start managing events</p>
+                        </div>
 
-      try {
-        const res = await fetch(`${BASE_URL}/api/auth/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
+                        <!-- Alert Messages -->
+                        <div id="alert-container"></div>
+
+                        <!-- Signup Form -->
+                        <form id="signupForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="firstName" class="form-label">
+                                        <i class="fas fa-user me-2"></i>First Name
+                                    </label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="lastName" class="form-label">
+                                        <i class="fas fa-user me-2"></i>Last Name
+                                    </label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>Email Address
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">
+                                    <i class="fas fa-phone me-2"></i>Phone Number
+                                </label>
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="role" class="form-label">
+                                    <i class="fas fa-user-tag me-2"></i>I am a
+                                </label>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="">Select your role</option>
+                                    <option value="student">🎓 Student</option>
+                                    <option value="club">🏛️ Club/Organization</option>
+                                </select>
+                            </div>
+
+                            <!-- Student-specific fields -->
+                            <div id="studentFields" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="studentId" class="form-label">
+                                            <i class="fas fa-id-card me-2"></i>Student ID
+                                        </label>
+                                        <input type="text" class="form-control" id="studentId" name="studentId" placeholder="Enter student ID">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="course" class="form-label">
+                                            <i class="fas fa-graduation-cap me-2"></i>Course
+                                        </label>
+                                        <input type="text" class="form-control" id="course" name="course" placeholder="Enter course name">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="year" class="form-label">
+                                            <i class="fas fa-calendar me-2"></i>Year
+                                        </label>
+                                        <select class="form-select" id="year" name="year">
+                                            <option value="">Select year</option>
+                                            <option value="1">1st Year</option>
+                                            <option value="2">2nd Year</option>
+                                            <option value="3">3rd Year</option>
+                                            <option value="4">4th Year</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="department" class="form-label">
+                                            <i class="fas fa-building me-2"></i>Department
+                                        </label>
+                                        <input type="text" class="form-control" id="department" name="department" placeholder="Enter department">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Club-specific fields -->
+                            <div id="clubFields" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="clubName" class="form-label">
+                                        <i class="fas fa-users me-2"></i>Club/Organization Name
+                                    </label>
+                                    <input type="text" class="form-control" id="clubName" name="clubName" placeholder="Enter club name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="clubDescription" class="form-label">
+                                        <i class="fas fa-info-circle me-2"></i>Description
+                                    </label>
+                                    <textarea class="form-control" id="clubDescription" name="clubDescription" rows="3" placeholder="Brief description of your club"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>Password
+                                </label>
+                                <div class="position-relative">
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Create a strong password" required minlength="6">
+                                    <button type="button" class="btn position-absolute end-0 top-0 h-100 border-0 bg-transparent text-light" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="text-light">Password must be at least 6 characters long</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>Confirm Password
+                                </label>
+                                <div class="position-relative">
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                                    <button type="button" class="btn position-absolute end-0 top-0 h-100 border-0 bg-transparent text-light" id="toggleConfirmPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="agreeTerms" name="agreeTerms" required>
+                                    <label class="form-check-label text-light" for="agreeTerms">
+                                        I agree to the <a href="#" class="text-decoration-none" style="color: #3b82f6;">Terms of Service</a> and 
+                                        <a href="#" class="text-decoration-none" style="color: #3b82f6;">Privacy Policy</a>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 mb-3" id="signupBtn">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </button>
+
+                            <div class="text-center">
+                                <p class="text-light mb-0">
+                                    Already have an account? 
+                                    <a href="login.html" class="text-decoration-none fw-bold" style="color: #3b82f6;">
+                                        Sign In
+                                    </a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation JS -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <!-- Custom JS -->
+    <script src="config.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
         });
 
-        const data = await res.json();
+        // Toggle Password Visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            togglePasswordField('password', this);
+        });
 
-        if (res.ok) {
-          successMsg.textContent = "✅ Registration successful! Redirecting to login...";
-          successMsg.style.display = "block";
-          setTimeout(() => window.location.href = "login.html", 2000);
-        } else {
-          throw new Error(data.error || "Something went wrong.");
+        document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+            togglePasswordField('confirmPassword', this);
+        });
+
+        function togglePasswordField(fieldId, button) {
+            const passwordInput = document.getElementById(fieldId);
+            const icon = button.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
         }
-      } catch (error) {
-        errorMsg.textContent = `❌ ${error.message}`;
-        errorMsg.style.display = "block";
-      }
-    });
-</script>
-<script src="navbar.js"></script>
+
+        // Show/Hide role-specific fields
+        document.getElementById('role').addEventListener('change', function() {
+            const role = this.value;
+            const studentFields = document.getElementById('studentFields');
+            const clubFields = document.getElementById('clubFields');
+            
+            // Hide all fields first
+            studentFields.style.display = 'none';
+            clubFields.style.display = 'none';
+            
+            // Show relevant fields
+            if (role === 'student') {
+                studentFields.style.display = 'block';
+                // Make student fields required
+                studentFields.querySelectorAll('input, select').forEach(field => {
+                    if (field.id !== 'year') field.required = true;
+                });
+                // Make club fields not required
+                clubFields.querySelectorAll('input, textarea').forEach(field => {
+                    field.required = false;
+                });
+            } else if (role === 'club') {
+                clubFields.style.display = 'block';
+                // Make club fields required
+                clubFields.querySelectorAll('input, textarea').forEach(field => {
+                    field.required = true;
+                });
+                // Make student fields not required
+                studentFields.querySelectorAll('input, select').forEach(field => {
+                    field.required = false;
+                });
+            }
+        });
+
+        // Show Alert Function
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Password validation
+        function validatePassword() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showAlert('Passwords do not match!', 'danger');
+                return false;
+            }
+            
+            if (password.length < 6) {
+                showAlert('Password must be at least 6 characters long!', 'danger');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Handle Signup Form Submission
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validatePassword()) {
+                return;
+            }
+            
+            const signupBtn = document.getElementById('signupBtn');
+            const originalText = signupBtn.innerHTML;
+            
+            // Show loading state
+            signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
+            signupBtn.disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                const signupData = Object.fromEntries(formData.entries());
+                
+                // Remove confirmPassword from data
+                delete signupData.confirmPassword;
+                delete signupData.agreeTerms;
+                
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(signupData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Account created successfully! Redirecting to login...', 'success');
+                    
+                    // Redirect to login page
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showAlert(data.message || 'Registration failed. Please try again.', 'danger');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showAlert('Network error. Please check your connection and try again.', 'danger');
+            } finally {
+                // Reset button state
+                signupBtn.innerHTML = originalText;
+                signupBtn.disabled = false;
+            }
+        });
+
+        // Form validation enhancements
+        const form = document.getElementById('signupForm');
+        const inputs = form.querySelectorAll('input, select, textarea');
+        
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                this.classList.remove('is-invalid', 'is-valid');
+            });
+        });
+
+        // Real-time password confirmation validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else if (confirmPassword && password === confirmPassword) {
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+            }
+        });
+    </script>
 </body>
 </html>

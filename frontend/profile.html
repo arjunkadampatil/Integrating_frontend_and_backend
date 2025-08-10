@@ -1,47 +1,600 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Your Profile - EventSphere</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <style>.profile-pic { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; }</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - EventSphere</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header id="navbar-container"></header>
-  <div class="container mt-5">
-    <div class="row justify-content-center text-center">
-      <div class="col-md-6"><img src="https://via.placeholder.com/150" alt="Profile Picture" class="profile-pic mb-3" id="profile-image-display">
-        <h2 id="profile-name">Loading...</h2><p class="text-muted" id="profile-email">...</p></div>
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
     </div>
-    <div class="row justify-content-center mt-4">
-      <div class="col-md-6"><h4>Update Profile</h4>
-        <form id="profile-update-form">
-          <div class="mb-3"><label for="name" class="form-label">Full Name</label><input type="text" class="form-control" id="name"></div>
-          <div class="mb-3"><label for="email" class="form-label">Email</label><input type="email" class="form-control" id="email"></div>
-          <button type="submit" class="btn btn-primary">Update Details</button>
-        </form><hr class="my-4"><h4>Update Profile Picture</h4>
-        <form id="profile-image-form">
-            <div class="mb-3"><label for="profileImage" class="form-label">Upload New Image</label><input class="form-control" type="file" id="profileImage" accept="image/*"></div>
-            <button type="submit" class="btn btn-secondary">Upload Image</button>
-        </form>
-        <p id="profile-message" class="mt-3 text-success" style="display: none;"></p><p id="profile-error" class="mt-3 text-danger" style="display: none;"></p>
-      </div></div></div>
-<script src="config.js"></script>
-<script>
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = "login.html";
-    const headers = { 'Authorization': `Bearer ${token}` };
-    const nameInput = document.getElementById('name'), emailInput = document.getElementById('email'), profileName = document.getElementById('profile-name'), profileEmail = document.getElementById('profile-email'), profileImageDisplay = document.getElementById('profile-image-display'), msg = document.getElementById('profile-message'), err = document.getElementById('profile-error');
-    const userRole = localStorage.getItem('role');
-    if (userRole === 'club') document.getElementById('dashboard-link').href = 'club-dashborad.html';
-    if (userRole === 'admin') document.getElementById('dashboard-link').href = 'admin-dashborad.html';
-    async function loadProfile() { try { const res = await fetch(`${BASE_URL}/api/users/profile`, { headers }); const user = await res.json(); if (!res.ok) throw new Error(user.error); nameInput.value = user.name; emailInput.value = user.email; profileName.innerText = user.name; profileEmail.innerText = user.email; if (user.profileImageUrl) profileImageDisplay.src = `${BASE_URL}${user.profileImageUrl}`; } catch (error) { err.innerText = error.message; err.style.display = 'block'; } }
-    document.getElementById('profile-update-form').addEventListener('submit', async (e) => { e.preventDefault(); try { const res = await fetch(`${BASE_URL}/api/users/profile`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify({ name: nameInput.value, email: emailInput.value }) }); const result = await res.json(); if (!res.ok) throw new Error(result.error); msg.innerText = 'Profile details updated!'; msg.style.display = 'block'; loadProfile(); } catch (error) { err.innerText = error.message; err.style.display = 'block'; } });
-    document.getElementById('profile-image-form').addEventListener('submit', async (e) => { e.preventDefault(); const fileInput = document.getElementById('profileImage'); if (fileInput.files.length === 0) { err.innerText = 'Please select an image file.'; err.style.display = 'block'; return; } const formData = new FormData(); formData.append('profileImage', fileInput.files[0]); try { const res = await fetch(`${BASE_URL}/api/users/profile/image`, { method: 'POST', headers, body: formData }); const result = await res.json(); if (!res.ok) throw new Error(result.error); msg.innerText = 'Profile image updated!'; msg.style.display = 'block'; profileImageDisplay.src = `${BASE_URL}${result.user.profileImageUrl}`; } catch (error) { err.innerText = error.message; err.style.display = 'block'; } });
-    document.addEventListener('DOMContentLoaded', loadProfile);
-</script>
-<script src="navbar.js"></script>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="assets/logo.svg" alt="EventSphere" class="me-2">
+                <span class="fs-4 fw-bold">EventSphere</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="event.html">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="dashboardLink">Dashboard</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown" id="userMenu">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="userName">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end glass-dark">
+                            <li><a class="dropdown-item text-light" href="#" id="dashboardMenuItem">Dashboard</a></li>
+                            <li><a class="dropdown-item text-light active" href="profile.html">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-light" href="#" id="logoutLink">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Container -->
+    <div class="dashboard-container">
+        <div class="container py-5">
+            <!-- Header Section -->
+            <div class="row mt-5 mb-4">
+                <div class="col-12">
+                    <div class="glass p-4 rounded-4" data-aos="fade-up">
+                        <div class="d-flex align-items-center">
+                            <div class="profile-avatar me-4">
+                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user fa-2x text-white"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h1 class="h2 fw-bold mb-2" id="profileName">Loading...</h1>
+                                <p class="text-light mb-1" id="profileEmail">Loading...</p>
+                                <span class="badge badge-primary" id="profileRole">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Profile Information -->
+                <div class="col-lg-8">
+                    <div class="glass p-4 rounded-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <h3 class="fw-bold mb-0">
+                                <i class="fas fa-user-edit me-2"></i>Profile Information
+                            </h3>
+                            <button class="btn btn-primary" id="editProfileBtn">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </button>
+                        </div>
+
+                        <!-- Profile Form -->
+                        <form id="profileForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" readonly>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" readonly>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="role" class="form-label">Role</label>
+                                <input type="text" class="form-control" id="role" name="role" readonly>
+                            </div>
+
+                            <!-- Student-specific fields -->
+                            <div id="studentFields" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="studentId" class="form-label">Student ID</label>
+                                        <input type="text" class="form-control" id="studentId" name="studentId" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="course" class="form-label">Course</label>
+                                        <input type="text" class="form-control" id="course" name="course" readonly>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="year" class="form-label">Year</label>
+                                        <input type="text" class="form-control" id="year" name="year" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="department" class="form-label">Department</label>
+                                        <input type="text" class="form-control" id="department" name="department" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Club-specific fields -->
+                            <div id="clubFields" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="clubName" class="form-label">Club/Organization Name</label>
+                                    <input type="text" class="form-control" id="clubName" name="clubName" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="clubDescription" class="form-label">Description</label>
+                                    <textarea class="form-control" id="clubDescription" name="clubDescription" rows="3" readonly></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Action buttons (hidden by default) -->
+                            <div class="d-flex gap-3 mt-4" id="profileActions" style="display: none;">
+                                <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="cancelEditBtn">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Security & Settings -->
+                <div class="col-lg-4">
+                    <!-- Change Password -->
+                    <div class="glass p-4 rounded-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                        <h4 class="fw-bold mb-3">
+                            <i class="fas fa-lock me-2"></i>Security
+                        </h4>
+                        <form id="passwordForm">
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="newPassword" name="newPassword" required minlength="6">
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-warning w-100" id="changePasswordBtn">
+                                <i class="fas fa-key me-2"></i>Change Password
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Account Stats -->
+                    <div class="glass p-4 rounded-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+                        <h4 class="fw-bold mb-3">
+                            <i class="fas fa-chart-bar me-2"></i>Account Stats
+                        </h4>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-light">Member Since</span>
+                                <span class="fw-bold" id="memberSince">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="mb-3" id="studentStats" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-light">Events Registered</span>
+                                <span class="fw-bold" id="eventsRegistered">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-light">Certificates Earned</span>
+                                <span class="fw-bold" id="certificatesEarned">0</span>
+                            </div>
+                        </div>
+                        <div class="mb-3" id="clubStats" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-light">Events Created</span>
+                                <span class="fw-bold" id="eventsCreated">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-light">Total Registrations</span>
+                                <span class="fw-bold" id="totalRegistrations">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Actions -->
+                    <div class="glass p-4 rounded-4" data-aos="fade-up" data-aos-delay="400">
+                        <h4 class="fw-bold mb-3">
+                            <i class="fas fa-cogs me-2"></i>Account Actions
+                        </h4>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="downloadData()">
+                                <i class="fas fa-download me-2"></i>Download My Data
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteAccount()">
+                                <i class="fas fa-user-times me-2"></i>Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation JS -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <!-- Custom JS -->
+    <script src="config.js"></script>
+    <script src="navbar.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        let isEditing = false;
+        let originalProfileData = {};
+
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('userToken');
+            const role = localStorage.getItem('userRole');
+            
+            if (!token) {
+                Utils.showToast('Please login to access your profile.', 'warning');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set dashboard links based on role
+            setDashboardLinks(role);
+            
+            loadUserProfile();
+        });
+
+        // Set dashboard links based on user role
+        function setDashboardLinks(role) {
+            const dashboardLink = document.getElementById('dashboardLink');
+            const dashboardMenuItem = document.getElementById('dashboardMenuItem');
+            
+            let dashboardUrl = 'index.html';
+            
+            switch(role) {
+                case 'student':
+                    dashboardUrl = 'student-dashboard.html';
+                    break;
+                case 'club':
+                    dashboardUrl = 'club-dashboard.html';
+                    break;
+                case 'admin':
+                    dashboardUrl = 'admin-dashboard.html';
+                    break;
+            }
+            
+            if (dashboardLink) dashboardLink.href = dashboardUrl;
+            if (dashboardMenuItem) dashboardMenuItem.href = dashboardUrl;
+        }
+
+        // Load user profile
+        async function loadUserProfile() {
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/user/profile`);
+                
+                if (response && response.success) {
+                    populateProfile(response.user);
+                    originalProfileData = { ...response.user };
+                } else {
+                    throw new Error(response?.message || 'Failed to load profile');
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                Utils.showToast('Error loading profile data', 'danger');
+            }
+        }
+
+        // Populate profile form
+        function populateProfile(user) {
+            // Basic information
+            document.getElementById('profileName').textContent = `${user.firstName} ${user.lastName}`;
+            document.getElementById('profileEmail').textContent = user.email;
+            document.getElementById('profileRole').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
+            
+            // Form fields
+            document.getElementById('firstName').value = user.firstName || '';
+            document.getElementById('lastName').value = user.lastName || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('role').value = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            
+            // Role-specific fields
+            if (user.role === 'student') {
+                document.getElementById('studentFields').style.display = 'block';
+                document.getElementById('clubFields').style.display = 'none';
+                document.getElementById('studentStats').style.display = 'block';
+                document.getElementById('clubStats').style.display = 'none';
+                
+                document.getElementById('studentId').value = user.studentId || '';
+                document.getElementById('course').value = user.course || '';
+                document.getElementById('year').value = user.year ? `${user.year} Year` : '';
+                document.getElementById('department').value = user.department || '';
+                
+                // Student stats
+                document.getElementById('eventsRegistered').textContent = user.stats?.eventsRegistered || 0;
+                document.getElementById('certificatesEarned').textContent = user.stats?.certificatesEarned || 0;
+            } else if (user.role === 'club') {
+                document.getElementById('clubFields').style.display = 'block';
+                document.getElementById('studentFields').style.display = 'none';
+                document.getElementById('clubStats').style.display = 'block';
+                document.getElementById('studentStats').style.display = 'none';
+                
+                document.getElementById('clubName').value = user.clubName || '';
+                document.getElementById('clubDescription').value = user.clubDescription || '';
+                
+                // Club stats
+                document.getElementById('eventsCreated').textContent = user.stats?.eventsCreated || 0;
+                document.getElementById('totalRegistrations').textContent = user.stats?.totalRegistrations || 0;
+            } else {
+                document.getElementById('studentFields').style.display = 'none';
+                document.getElementById('clubFields').style.display = 'none';
+                document.getElementById('studentStats').style.display = 'none';
+                document.getElementById('clubStats').style.display = 'none';
+            }
+            
+            // Member since
+            if (user.createdAt) {
+                document.getElementById('memberSince').textContent = Utils.formatDate(user.createdAt, 'long');
+            }
+        }
+
+        // Edit profile functionality
+        document.getElementById('editProfileBtn').addEventListener('click', function() {
+            if (!isEditing) {
+                enableEditMode();
+            }
+        });
+
+        function enableEditMode() {
+            isEditing = true;
+            
+            // Enable form fields
+            const formInputs = document.querySelectorAll('#profileForm input, #profileForm textarea');
+            formInputs.forEach(input => {
+                if (input.id !== 'email' && input.id !== 'role') { // Keep email and role readonly
+                    input.removeAttribute('readonly');
+                }
+            });
+            
+            // Show action buttons
+            document.getElementById('profileActions').style.display = 'flex';
+            
+            // Update edit button
+            const editBtn = document.getElementById('editProfileBtn');
+            editBtn.style.display = 'none';
+        }
+
+        function disableEditMode() {
+            isEditing = false;
+            
+            // Disable form fields
+            const formInputs = document.querySelectorAll('#profileForm input, #profileForm textarea');
+            formInputs.forEach(input => {
+                input.setAttribute('readonly', true);
+            });
+            
+            // Hide action buttons
+            document.getElementById('profileActions').style.display = 'none';
+            
+            // Show edit button
+            const editBtn = document.getElementById('editProfileBtn');
+            editBtn.style.display = 'block';
+        }
+
+        // Cancel edit
+        document.getElementById('cancelEditBtn').addEventListener('click', function() {
+            populateProfile(originalProfileData);
+            disableEditMode();
+        });
+
+        // Save profile changes
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!isEditing) return;
+            
+            const saveBtn = document.getElementById('saveProfileBtn');
+            Utils.setLoading(saveBtn, true);
+            
+            try {
+                const formData = new FormData(this);
+                const profileData = Object.fromEntries(formData.entries());
+                
+                // Remove readonly fields
+                delete profileData.email;
+                delete profileData.role;
+                
+                const response = await Utils.apiRequest(`${API_BASE_URL}/user/profile`, {
+                    method: 'PUT',
+                    body: JSON.stringify(profileData)
+                });
+                
+                if (response && response.success) {
+                    Utils.showToast('Profile updated successfully!', 'success');
+                    originalProfileData = { ...originalProfileData, ...profileData };
+                    populateProfile(originalProfileData);
+                    disableEditMode();
+                    
+                    // Update navbar name
+                    if (window.EventSphereNavbar) {
+                        window.EventSphereNavbar.updateUserName(`${profileData.firstName} ${profileData.lastName}`);
+                    }
+                } else {
+                    throw new Error(response?.message || 'Failed to update profile');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                Utils.showToast('Error updating profile: ' + error.message, 'danger');
+            } finally {
+                Utils.setLoading(saveBtn, false);
+            }
+        });
+
+        // Change password
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                Utils.showToast('New passwords do not match!', 'danger');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('changePasswordBtn');
+            Utils.setLoading(submitBtn, true);
+            
+            try {
+                const formData = new FormData(this);
+                const passwordData = Object.fromEntries(formData.entries());
+                
+                const response = await Utils.apiRequest(`${API_BASE_URL}/user/change-password`, {
+                    method: 'POST',
+                    body: JSON.stringify(passwordData)
+                });
+                
+                if (response && response.success) {
+                    Utils.showToast('Password changed successfully!', 'success');
+                    this.reset();
+                } else {
+                    throw new Error(response?.message || 'Failed to change password');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                Utils.showToast('Error changing password: ' + error.message, 'danger');
+            } finally {
+                Utils.setLoading(submitBtn, false);
+            }
+        });
+
+        // Download user data
+        async function downloadData() {
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/user/export-data`);
+                
+                if (response && response.success) {
+                    // Create and download file
+                    const blob = new Blob([JSON.stringify(response.data, null, 2)], {
+                        type: 'application/json'
+                    });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `eventsphere-data-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    Utils.showToast('Data exported successfully!', 'success');
+                } else {
+                    throw new Error('Failed to export data');
+                }
+            } catch (error) {
+                console.error('Error downloading data:', error);
+                Utils.showToast('Error downloading data', 'danger');
+            }
+        }
+
+        // Delete account
+        async function deleteAccount() {
+            const confirmation = prompt('Are you sure you want to delete your account? This action cannot be undone.\n\nType "DELETE" to confirm:');
+            
+            if (confirmation !== 'DELETE') {
+                return;
+            }
+            
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/user/delete-account`, {
+                    method: 'DELETE'
+                });
+                
+                if (response && response.success) {
+                    Utils.showToast('Account deleted successfully. You will be logged out.', 'success');
+                    
+                    // Clear local storage and redirect
+                    setTimeout(() => {
+                        Utils.logout();
+                    }, 2000);
+                } else {
+                    throw new Error(response?.message || 'Failed to delete account');
+                }
+            } catch (error) {
+                console.error('Error deleting account:', error);
+                Utils.showToast('Error deleting account: ' + error.message, 'danger');
+            }
+        }
+
+        // Real-time password validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && newPassword !== confirmPassword) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else if (confirmPassword && newPassword === confirmPassword) {
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+            } else {
+                this.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+    </script>
 </body>
 </html>

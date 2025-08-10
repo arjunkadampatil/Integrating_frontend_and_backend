@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - EventSphere</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="assets/logo.svg" alt="EventSphere" class="me-2">
+                <span class="fs-4 fw-bold">EventSphere</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="event.html">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="admin-dashboard.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="analytics.html">Analytics</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown" id="userMenu">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-shield me-1"></i>
+                            <span id="userName">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end glass-dark">
+                            <li><a class="dropdown-item text-light" href="admin-dashboard.html">Dashboard</a></li>
+                            <li><a class="dropdown-item text-light" href="analytics.html">Analytics</a></li>
+                            <li><a class="dropdown-item text-light" href="profile.html">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-light" href="#" id="logoutLink">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <div class="container-fluid px-4 py-5">
+            <!-- Welcome Section -->
+            <div class="row mt-5 mb-4">
+                <div class="col-12">
+                    <div class="glass p-4 rounded-4" data-aos="fade-up">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap">
+                            <div>
+                                <h1 class="h2 fw-bold mb-2">
+                                    <i class="fas fa-user-shield me-3" style="color: #3b82f6;"></i>
+                                    Admin Dashboard - <span id="welcomeName">Administrator</span>
+                                </h1>
+                                <p class="text-light mb-0">Manage events, users, and platform analytics</p>
+                            </div>
+                            <div class="text-end">
+                                <a href="analytics.html" class="btn btn-secondary me-2">
+                                    <i class="fas fa-chart-bar me-2"></i>View Analytics
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row g-4 mb-5">
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stats-card">
+                        <i class="fas fa-calendar-alt fa-3x mb-3" style="color: #3b82f6;"></i>
+                        <div class="stats-number" id="totalEvents">0</div>
+                        <div class="stats-label">Total Events</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stats-card">
+                        <i class="fas fa-users fa-3x mb-3" style="color: #10b981;"></i>
+                        <div class="stats-number" id="totalUsers">0</div>
+                        <div class="stats-label">Registered Users</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stats-card">
+                        <i class="fas fa-clock fa-3x mb-3" style="color: #f59e0b;"></i>
+                        <div class="stats-number" id="pendingApprovals">0</div>
+                        <div class="stats-label">Pending Approvals</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="stats-card">
+                        <i class="fas fa-building fa-3x mb-3" style="color: #8b5cf6;"></i>
+                        <div class="stats-number" id="totalClubs">0</div>
+                        <div class="stats-label">Active Clubs</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Approval Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="glass p-4 rounded-4" data-aos="fade-up">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <h3 class="fw-bold mb-0">
+                                <i class="fas fa-gavel me-2"></i>Event Approval Requests
+                            </h3>
+                            <div class="d-flex gap-2">
+                                <select class="form-select" id="statusFilter" style="width: auto;">
+                                    <option value="pending">Pending Approval</option>
+                                    <option value="">All Events</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Loading Spinner -->
+                        <div class="loading-spinner text-center" id="eventsLoading">
+                            <div class="spinner"></div>
+                            <p>Loading events...</p>
+                        </div>
+
+                        <!-- Events Table -->
+                        <div class="table-responsive" id="eventsTableContainer" style="display: none;">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Event Details</th>
+                                        <th>Organizer</th>
+                                        <th>Date & Venue</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="eventsTableBody">
+                                    <!-- Events will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- No Events Message -->
+                        <div class="text-center py-5" id="noEventsMessage" style="display: none;">
+                            <i class="fas fa-check-circle fa-3x mb-3" style="color: #10b981;"></i>
+                            <h5>All Caught Up!</h5>
+                            <p class="text-light">No pending event approvals at the moment.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Section -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="glass p-4 rounded-4" data-aos="fade-up" data-aos-delay="100">
+                        <h4 class="fw-bold mb-3">
+                            <i class="fas fa-users-cog me-2"></i>User Management
+                        </h4>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="viewAllUsers()">
+                                <i class="fas fa-users me-2"></i>View All Users
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="exportUserData()">
+                                <i class="fas fa-download me-2"></i>Export User Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="glass p-4 rounded-4" data-aos="fade-up" data-aos-delay="200">
+                        <h4 class="fw-bold mb-3">
+                            <i class="fas fa-cog me-2"></i>System Settings
+                        </h4>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="manageVenues()">
+                                <i class="fas fa-map-marker-alt me-2"></i>Manage Venues
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="systemSettings()">
+                                <i class="fas fa-cogs me-2"></i>System Configuration
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div class="modal fade" id="eventDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle me-2"></i>Event Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="eventDetailsContent">
+                    <!-- Event details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Venue Assignment Modal -->
+    <div class="modal fade" id="venueModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-map-marker-alt me-2"></i>Assign Venue
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="venueAssignmentForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="venueEventId" name="eventId">
+                        <div class="mb-3">
+                            <label for="assignedVenue" class="form-label">Select Venue</label>
+                            <select class="form-select" id="assignedVenue" name="venue" required>
+                                <option value="">Choose a venue...</option>
+                                <option value="Main Auditorium">Main Auditorium</option>
+                                <option value="Conference Hall A">Conference Hall A</option>
+                                <option value="Conference Hall B">Conference Hall B</option>
+                                <option value="Seminar Room 1">Seminar Room 1</option>
+                                <option value="Seminar Room 2">Seminar Room 2</option>
+                                <option value="Computer Lab">Computer Lab</option>
+                                <option value="Sports Ground">Sports Ground</option>
+                                <option value="Basketball Court">Basketball Court</option>
+                                <option value="Library Hall">Library Hall</option>
+                                <option value="Cafeteria">Cafeteria</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="venueNotes" class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="venueNotes" name="notes" rows="3" placeholder="Any special instructions or requirements..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="assignVenueBtn">
+                            <i class="fas fa-check me-2"></i>Assign Venue
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation JS -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <!-- Custom JS -->
+    <script src="config.js"></script>
+    <script src="navbar.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        let allEvents = [];
+
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('userToken');
+            const role = localStorage.getItem('userRole');
+            
+            if (!token || role !== 'admin') {
+                Utils.showToast('Access denied. Please login as an administrator.', 'danger');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set user name
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('welcomeName').textContent = userName;
+            }
+            
+            loadDashboardData();
+        });
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                await Promise.all([
+                    loadEvents(),
+                    loadDashboardStats()
+                ]);
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                Utils.showToast('Error loading dashboard data', 'danger');
+            }
+        }
+
+        // Load events for approval
+        async function loadEvents() {
+            const loadingSpinner = document.getElementById('eventsLoading');
+            const tableContainer = document.getElementById('eventsTableContainer');
+            const noEventsMessage = document.getElementById('noEventsMessage');
+            
+            loadingSpinner.style.display = 'block';
+            tableContainer.style.display = 'none';
+            noEventsMessage.style.display = 'none';
+            
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/admin/events`);
+                
+                if (response && response.success) {
+                    allEvents = response.events || [];
+                    renderEvents();
+                } else {
+                    throw new Error(response?.message || 'Failed to load events');
+                }
+            } catch (error) {
+                console.error('Error loading events:', error);
+                Utils.showToast('Error loading events', 'danger');
+                noEventsMessage.style.display = 'block';
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/admin/dashboard`);
+                
+                if (response && response.success) {
+                    const stats = response.stats;
+                    document.getElementById('totalEvents').textContent = stats.totalEvents || 0;
+                    document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+                    document.getElementById('pendingApprovals').textContent = stats.pendingApprovals || 0;
+                    document.getElementById('totalClubs').textContent = stats.totalClubs || 0;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        // Render events table
+        function renderEvents() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            let filteredEvents = allEvents;
+            
+            if (statusFilter) {
+                filteredEvents = allEvents.filter(event => event.status === statusFilter);
+            }
+            
+            const tableBody = document.getElementById('eventsTableBody');
+            const tableContainer = document.getElementById('eventsTableContainer');
+            const noEventsMessage = document.getElementById('noEventsMessage');
+            
+            if (filteredEvents.length === 0) {
+                tableContainer.style.display = 'none';
+                noEventsMessage.style.display = 'block';
+                return;
+            }
+            
+            tableContainer.style.display = 'block';
+            noEventsMessage.style.display = 'none';
+            
+            tableBody.innerHTML = filteredEvents.map(event => `
+                <tr>
+                    <td>
+                        <strong>${event.eventName}</strong>
+                        <br>
+                        <small class="text-muted">${Utils.truncateText(event.description, 60)}</small>
+                        ${event.category ? `<br><span class="badge badge-secondary mt-1">${event.category}</span>` : ''}
+                    </td>
+                    <td>
+                        <i class="fas fa-user me-1"></i>
+                        ${event.organizer || 'Unknown'}
+                        <br>
+                        <small class="text-muted">${event.organizerEmail || ''}</small>
+                    </td>
+                    <td>
+                        <i class="fas fa-calendar me-1"></i>
+                        ${Utils.formatDate(event.eventDate)}<br>
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            ${event.eventTime || 'TBA'}
+                        </small>
+                        <br>
+                        <small class="text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            ${event.venue || 'Not assigned'}
+                        </small>
+                    </td>
+                    <td>
+                        <span class="badge ${event.eventType === 'Intercollege' ? 'badge-intercollege' : 'badge-intracollege'}">
+                            ${event.eventType}
+                        </span>
+                        ${event.registrationFee ? `<br><small class="text-warning">₹${event.registrationFee}</small>` : ''}
+                    </td>
+                    <td>
+                        <span class="badge ${getStatusBadgeClass(event.status)}">
+                            ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="btn-group-vertical">
+                            <button class="btn btn-sm btn-outline-primary mb-1" onclick="viewEventDetails('${event._id}')" title="View Details">
+                                <i class="fas fa-eye me-1"></i>Details
+                            </button>
+                            ${event.status === 'pending' ? `
+                                <button class="btn btn-sm btn-success mb-1" onclick="approveEvent('${event._id}')" title="Approve Event">
+                                    <i class="fas fa-check me-1"></i>Approve
+                                </button>
+                                <button class="btn btn-sm btn-warning mb-1" onclick="assignVenue('${event._id}')" title="Assign Venue">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Venue
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="rejectEvent('${event._id}')" title="Reject Event">
+                                    <i class="fas fa-times me-1"></i>Reject
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Get status badge class
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'approved': return 'badge-approved';
+                case 'pending': return 'badge-pending';
+                case 'rejected': return 'badge-rejected';
+                default: return 'badge-pending';
+            }
+        }
+
+        // Filter events
+        document.getElementById('statusFilter').addEventListener('change', renderEvents);
+
+        // View event details
+        async function viewEventDetails(eventId) {
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/events/${eventId}`);
+                
+                if (response && response.success) {
+                    const event = response.event;
+                    const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+                    
+                    document.getElementById('eventDetailsContent').innerHTML = `
+                        <div class="glass p-4 rounded-3">
+                            <h4>${event.eventName}</h4>
+                            <p class="text-light">${event.description}</p>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-calendar me-2"></i>Date & Time</h6>
+                                    <p>${Utils.formatDate(event.eventDate)} at ${event.eventTime || 'TBA'}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-map-marker-alt me-2"></i>Venue</h6>
+                                    <p>${event.venue || 'Not assigned'}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-user me-2"></i>Organizer</h6>
+                                    <p>${event.organizer || 'Unknown'}<br>
+                                    <small class="text-muted">${event.organizerEmail || ''}</small></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-tag me-2"></i>Category</h6>
+                                    <p>${event.category || 'General'}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-users me-2"></i>Event Type</h6>
+                                    <p>${event.eventType}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-rupee-sign me-2"></i>Registration Fee</h6>
+                                    <p>${event.registrationFee ? '₹' + event.registrationFee : 'Free'}</p>
+                                </div>
+                            </div>
+                            
+                            ${event.maxParticipants ? `
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6><i class="fas fa-users me-2"></i>Max Participants</h6>
+                                        <p>${event.maxParticipants}</p>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    modal.show();
+                }
+            } catch (error) {
+                console.error('Error loading event details:', error);
+                Utils.showToast('Error loading event details', 'danger');
+            }
+        }
+
+        // Approve event
+        async function approveEvent(eventId) {
+            if (!confirm('Are you sure you want to approve this event?')) return;
+            
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/events/${eventId}/approve`, {
+                    method: 'POST'
+                });
+                
+                if (response && response.success) {
+                    Utils.showToast('Event approved successfully!', 'success');
+                    loadDashboardData(); // Reload data
+                } else {
+                    throw new Error(response?.message || 'Failed to approve event');
+                }
+            } catch (error) {
+                console.error('Error approving event:', error);
+                Utils.showToast('Error approving event: ' + error.message, 'danger');
+            }
+        }
+
+        // Reject event
+        async function rejectEvent(eventId) {
+            const reason = prompt('Please provide a reason for rejection (optional):');
+            if (reason === null) return; // User cancelled
+            
+            try {
+                const response = await Utils.apiRequest(`${API_BASE_URL}/events/${eventId}/reject`, {
+                    method: 'POST',
+                    body: JSON.stringify({ reason })
+                });
+                
+                if (response && response.success) {
+                    Utils.showToast('Event rejected successfully!', 'success');
+                    loadDashboardData(); // Reload data
+                } else {
+                    throw new Error(response?.message || 'Failed to reject event');
+                }
+            } catch (error) {
+                console.error('Error rejecting event:', error);
+                Utils.showToast('Error rejecting event: ' + error.message, 'danger');
+            }
+        }
+
+        // Assign venue
+        function assignVenue(eventId) {
+            document.getElementById('venueEventId').value = eventId;
+            const modal = new bootstrap.Modal(document.getElementById('venueModal'));
+            modal.show();
+        }
+
+        // Handle venue assignment
+        document.getElementById('venueAssignmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('assignVenueBtn');
+            Utils.setLoading(submitBtn, true);
+            
+            try {
+                const formData = new FormData(this);
+                const venueData = Object.fromEntries(formData.entries());
+                const eventId = venueData.eventId;
+                
+                const response = await Utils.apiRequest(`${API_BASE_URL}/events/${eventId}/assign-venue`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        venue: venueData.venue,
+                        notes: venueData.notes
+                    })
+                });
+                
+                if (response && response.success) {
+                    Utils.showToast('Venue assigned successfully!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('venueModal')).hide();
+                    this.reset();
+                    loadDashboardData(); // Reload data
+                } else {
+                    throw new Error(response?.message || 'Failed to assign venue');
+                }
+            } catch (error) {
+                console.error('Error assigning venue:', error);
+                Utils.showToast('Error assigning venue: ' + error.message, 'danger');
+            } finally {
+                Utils.setLoading(submitBtn, false);
+            }
+        });
+
+        // Quick action functions
+        function viewAllUsers() {
+            // Implementation for viewing all users
+            Utils.showToast('User management feature coming soon!', 'info');
+        }
+
+        function exportUserData() {
+            // Implementation for exporting user data
+            Utils.showToast('Export feature coming soon!', 'info');
+        }
+
+        function manageVenues() {
+            // Implementation for managing venues
+            Utils.showToast('Venue management feature coming soon!', 'info');
+        }
+
+        function systemSettings() {
+            // Implementation for system settings
+            Utils.showToast('System settings feature coming soon!', 'info');
+        }
+    </script>
+</body>
+</html>

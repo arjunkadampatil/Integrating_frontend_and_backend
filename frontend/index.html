@@ -2,78 +2,334 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EventSphere - Home</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventSphere - Modern Event Management Platform</title>
+    
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header id="navbar-container"></header>
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
 
-    <header class="bg-primary text-white text-center py-5">
-        <h1>Welcome to EventSphere</h1>
-        <p class="lead">Your university's central hub for all events.</p>
-    </header>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#home">
+                <img src="assets/logo.svg" alt="EventSphere" class="me-2">
+                <span class="fs-4 fw-bold">EventSphere</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#events">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-2" href="signup.html">Get Started</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <section class="container my-5">
-        <h2 class="text-center mb-4">Upcoming Approved Events</h2>
-        <div class="row" id="events-container">
-            <p class="text-center text-muted">Loading events...</p>
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6 hero-content" data-aos="fade-right" data-aos-duration="1000">
+                    <h1 class="hero-title">Welcome to EventSphere</h1>
+                    <p class="hero-subtitle">Transform your college events with our comprehensive management platform. Create, manage, and attend events seamlessly.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#events" class="btn btn-primary btn-lg">
+                            <i class="fas fa-rocket me-2"></i>Explore Events
+                        </a>
+                        <a href="signup.html" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Join Now
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+                    <div class="text-center">
+                        <img src="assets/logo.svg" alt="EventSphere" class="img-fluid" style="max-width: 400px; filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.5));">
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <footer class="bg-dark text-white text-center p-3 mt-5">
-        © 2025 EventSphere
+    <!-- Features Section -->
+    <section id="about" class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5" data-aos="fade-up">
+                    <h2 class="display-4 fw-bold mb-4">Why Choose EventSphere?</h2>
+                    <p class="lead text-light">Everything you need to manage college events efficiently</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stats-card h-100">
+                        <i class="fas fa-calendar-alt fa-3x mb-3" style="color: #3b82f6;"></i>
+                        <h4>Easy Event Creation</h4>
+                        <p class="text-light">Create and manage events with our intuitive interface. Set dates, venues, and track registrations effortlessly.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stats-card h-100">
+                        <i class="fas fa-qrcode fa-3x mb-3" style="color: #8b5cf6;"></i>
+                        <h4>QR Code Attendance</h4>
+                        <p class="text-light">Generate QR codes for events and track attendance digitally. No more paper-based registration systems.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stats-card h-100">
+                        <i class="fas fa-certificate fa-3x mb-3" style="color: #f59e0b;"></i>
+                        <h4>Digital Certificates</h4>
+                        <p class="text-light">Automatically generate and distribute participation certificates to event attendees.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="stats-card h-100">
+                        <i class="fas fa-users fa-3x mb-3" style="color: #06b6d4;"></i>
+                        <h4>Multi-Role Support</h4>
+                        <p class="text-light">Different dashboards for students, clubs, and administrators with role-specific features.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                    <div class="stats-card h-100">
+                        <i class="fas fa-chart-bar fa-3x mb-3" style="color: #10b981;"></i>
+                        <h4>Analytics & Reports</h4>
+                        <p class="text-light">Get detailed insights about event performance, attendance rates, and user engagement.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                    <div class="stats-card h-100">
+                        <i class="fas fa-mobile-alt fa-3x mb-3" style="color: #ef4444;"></i>
+                        <h4>Mobile Responsive</h4>
+                        <p class="text-light">Access EventSphere from any device. Fully responsive design for optimal mobile experience.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trending Events Section -->
+    <section id="events" class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5" data-aos="fade-up">
+                    <h2 class="display-4 fw-bold mb-4">Trending Events</h2>
+                    <p class="lead text-light">Discover the most popular events happening in your college</p>
+                </div>
+            </div>
+            
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="events-loading">
+                <div class="spinner"></div>
+                <p>Loading trending events...</p>
+            </div>
+            
+            <div class="row g-4" id="trending-events">
+                <!-- Events will be loaded dynamically -->
+            </div>
+            
+            <div class="text-center mt-5" data-aos="fade-up">
+                <a href="event.html" class="btn btn-primary btn-lg">
+                    <i class="fas fa-eye me-2"></i>View All Events
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center" data-aos="zoom-in">
+                    <div class="glass p-5 rounded-4">
+                        <h2 class="display-5 fw-bold mb-4">Ready to Get Started?</h2>
+                        <p class="lead mb-4">Join thousands of students and organizations already using EventSphere to manage their events.</p>
+                        <div class="d-flex flex-wrap justify-content-center gap-3">
+                            <a href="signup.html" class="btn btn-primary btn-lg">
+                                <i class="fas fa-rocket me-2"></i>Create Account
+                            </a>
+                            <a href="login.html" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="d-flex align-items-center justify-content-center mb-3">
+                        <img src="assets/logo.svg" alt="EventSphere" style="height: 30px;" class="me-2">
+                        <span class="fw-bold">EventSphere</span>
+                    </div>
+                    <p class="text-light mb-0">&copy; 2025 EventSphere. All rights reserved. | Modern Event Management Platform</p>
+                </div>
+            </div>
+        </div>
     </footer>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation JS -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <!-- Custom JS -->
     <script src="config.js"></script>
+    <script src="navbar.js"></script>
+    
     <script>
-        async function loadUpcomingEvents() {
-            const eventsContainer = document.getElementById('events-container');
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Load trending events
+        async function loadTrendingEvents() {
+            const eventsContainer = document.getElementById('trending-events');
+            const loadingSpinner = document.getElementById('events-loading');
+            
+            loadingSpinner.style.display = 'block';
+            
             try {
-                const res = await fetch(`${BASE_URL}/api/events`);
-                if (!res.ok) throw new Error('Failed to fetch events');
-                const allEvents = await res.json();
+                const response = await fetch(`${API_BASE_URL}/events`);
+                const data = await response.json();
                 
-                let eventsHtml = '';
-                // --- START OF FIX: More accurate time checking ---
-                const now = new Date(); // Get the current date and time
-
-                allEvents
-                    .filter(event => {
-                        if (event.status !== 'approved' || !event.date || !event.time) {
-                            return false;
-                        }
-                        // Create a full Date object with the event's specific time
-                        const eventDateTime = new Date(event.date);
-                        const [hours, minutes] = event.time.split(':');
-                        eventDateTime.setHours(hours, minutes, 0, 0);
-                        
-                        // Only include the event if its time is in the future
-                        return eventDateTime >= now;
-                    })
-                    .forEach(event => {
-                // --- END OF FIX ---
-                        eventsHtml += `
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100 shadow-sm">
-                                    <img src="${BASE_URL}${event.posterUrl}" class="card-img-top" style="height: 200px; object-fit: cover;" onerror="this.onerror=null;this.src='https://via.placeholder.com/400x200.png?text=EventSphere';">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${event.title}</h5>
-                                        <p class="card-text">${new Date(event.date).toLocaleDateString()}</p>
-                                        <a href="event.html?id=${event._id}" class="btn btn-primary">View Details</a>
+                if (data.success) {
+                    const events = data.events.slice(0, 6); // Show only 6 trending events
+                    
+                    eventsContainer.innerHTML = events.map(event => `
+                        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="${Math.random() * 300}">
+                            <div class="event-card">
+                                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="${event.eventName}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <span class="badge ${event.eventType === 'Intercollege' ? 'badge-intercollege' : 'badge-intracollege'}">${event.eventType}</span>
+                                        <span class="badge badge-approved">Active</span>
                                     </div>
+                                    <h5 class="card-title fw-bold">${event.eventName}</h5>
+                                    <p class="card-text text-light">${event.description?.substring(0, 100) || 'No description available'}${event.description?.length > 100 ? '...' : ''}</p>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <small class="text-light">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            ${new Date(event.eventDate).toLocaleDateString()}
+                                        </small>
+                                        <small class="text-light">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            ${event.venue || 'TBA'}
+                                        </small>
+                                    </div>
+                                    <a href="event.html" class="btn btn-primary w-100">
+                                        <i class="fas fa-eye me-2"></i>View Details
+                                    </a>
                                 </div>
-                            </div>`;
-                    });
-
-                eventsContainer.innerHTML = eventsHtml || '<p class="text-center text-muted">No upcoming events at this time.</p>';
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    eventsContainer.innerHTML = `
+                        <div class="col-12 text-center">
+                            <div class="glass p-5 rounded-4">
+                                <i class="fas fa-calendar-times fa-3x mb-3" style="color: #6b7280;"></i>
+                                <h4>No Events Available</h4>
+                                <p class="text-light">Check back later for exciting events!</p>
+                                <a href="login.html" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Create Event
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
             } catch (error) {
-                eventsContainer.innerHTML = `<p class="text-center text-danger">${error.message}</p>`;
+                console.error('Error loading events:', error);
+                eventsContainer.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="glass p-5 rounded-4">
+                            <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color: #f59e0b;"></i>
+                            <h4>Unable to Load Events</h4>
+                            <p class="text-light">Please check your internet connection and try again.</p>
+                            <button class="btn btn-primary" onclick="loadTrendingEvents()">
+                                <i class="fas fa-redo me-2"></i>Retry
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                loadingSpinner.style.display = 'none';
             }
         }
-        document.addEventListener("DOMContentLoaded", loadUpcomingEvents);
+
+        // Load trending events on page load
+        document.addEventListener('DOMContentLoaded', loadTrendingEvents);
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navbar
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(0, 0, 0, 0.95)';
+            } else {
+                navbar.style.background = 'rgba(0, 0, 0, 0.9)';
+            }
+        });
     </script>
-    <script src="navbar.js"></script>
 </body>
 </html>

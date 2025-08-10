@@ -177,28 +177,42 @@ router.post('/:id/upload-certificate-template', verifyToken, uploadCertTemplate.
 });
 
 // Event Recommendation System (Student)
+
+// --- START OF FIX: Event Recommendation System Now Filters by Date ---
 router.get('/recommended', verifyToken, async (req, res) => {
-    if (req.user.role !== 'student') return res.status(403).json({ error: 'Access denied' });
-    try {
-        const attendedEvents = await Event.find({ "attendees.userId": req.user.id, status: 'approved' });
-        const attendedEventTypes = [...new Set(attendedEvents.map(event => event.type))];
-        let recommendedEvents;
-        if (attendedEventTypes.length > 0) {
-            recommendedEvents = await Event.find({
-                type: { $in: attendedEventTypes },
-                status: 'approved',
-                "attendees.userId": { $ne: req.user.id }
-            }).limit(5).populate('createdBy', 'name');
-        } else {
-            recommendedEvents = await Event.find({
-                status: 'approved',
-                "attendees.userId": { $ne: req.user.id }
-            }).limit(5).populate('createdBy', 'name');
-        }
-        res.json(recommendedEvents);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch recommendations' });
+  if (req.user.role !== 'student') return res.status(403).json({ error: 'Access denied' });
+  try {
+    const attendedEvents = await Event.find({ "attendees.userId": req.user.id, "attendees.isAttended": true, status: 'approved' });
+    const attendedEventTypes = [...new Set(attendedEvents.map(event => event.type))];
+    
+    // Create a date object for the beginning of today (midnight)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let recommendedEvents;
+    const queryConditions = {
+        status: 'approved',
+        "attendees.userId": { $ne: req.user.id },
+        date: { $gte: today } // Only find events on or after today
+    };
+
+    if (attendedEventTypes.length > 0) {
+      // If user has attended events, find similar upcoming events
+      recommendedEvents = await Event.find({
+        ...queryConditions,
+        type: { $in: attendedEventTypes },
+      }).limit(5).populate('createdBy', 'name');
+    } else {
+      // Fallback for new users: find any upcoming events
+      recommendedEvents = await Event.find(queryConditions)
+      .limit(5).populate('createdBy', 'name');
     }
+    res.json(recommendedEvents);
+  } catch (err) {
+    console.error("Recommendation error:", err);
+    res.status(500).json({ error: 'Failed to fetch recommendations' });
+  }
 });
+// --- END OF FIX ---
 
 module.exports = router;
